@@ -1,0 +1,10 @@
+{
+  "name": "sdlc-review",
+  "displayName": "SDLC 7 · Review & Security",
+  "version": "0.1.0",
+  "description": "Phase 7 of the Agentic SDLC: AI first-pass pull request review against requirements and design, plus an OWASP-based security checklist, ending in a human merge sign-off.",
+  "author": { "name": "Tito", "email": "pino.islas@gmail.com" },
+  "license": "MIT",
+  "keywords": ["sdlc","code-review","security","owasp","pull-request"],
+  "dependencies": ["sdlc-core"]
+}

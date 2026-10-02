@@ -1,0 +1,9 @@
+{
+  "name": "sdlc-core",
+  "displayName": "SDLC Core (Conductor)",
+  "version": "0.1.0",
+  "description": "Backbone of the Agentic SDLC: a conductor that routes work through 10 phases, a state file that remembers where every project stands, human approval gates, and hooks that stop phases being skipped.",
+  "author": { "name": "Tito", "email": "pino.islas@gmail.com" },
+  "license": "MIT",
+  "keywords": ["sdlc", "agentic", "orchestrator", "governance", "scrum"]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "sdlc-qa",
+  "displayName": "SDLC 6 · QA",
+  "version": "0.1.0",
+  "description": "Phase 6 of the Agentic SDLC: derives test cases from acceptance criteria, automates them, runs them, and reports coverage and gaps back into requirements.",
+  "author": { "name": "Tito", "email": "pino.islas@gmail.com" },
+  "license": "MIT",
+  "keywords": ["sdlc","qa","testing","test-cases","playwright"],
+  "dependencies": ["sdlc-core"]
+}

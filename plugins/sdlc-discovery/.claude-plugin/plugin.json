@@ -1,0 +1,10 @@
+{
+  "name": "sdlc-discovery",
+  "displayName": "SDLC 1 · Discovery",
+  "version": "0.1.0",
+  "description": "Phase 1 of the Agentic SDLC: interviews you about an idea and produces a problem brief with hypothesis, success metric, constraints and scope.",
+  "author": { "name": "Tito", "email": "pino.islas@gmail.com" },
+  "license": "MIT",
+  "keywords": ["sdlc","discovery","product","ideation"],
+  "dependencies": ["sdlc-core"]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "sdlc-design",
+  "displayName": "SDLC 3 · Design",
+  "version": "0.1.0",
+  "description": "Phase 3 of the Agentic SDLC: drafts a technical design and ADRs from approved requirements by reading the real codebase, then has a design-reviewer agent challenge it.",
+  "author": { "name": "Tito", "email": "pino.islas@gmail.com" },
+  "license": "MIT",
+  "keywords": ["sdlc","architecture","design","adr","tech-lead"],
+  "dependencies": ["sdlc-core"]
+}

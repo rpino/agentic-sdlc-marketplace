@@ -1,0 +1,10 @@
+{
+  "name": "sdlc-requirements",
+  "displayName": "SDLC 2 · Requirements",
+  "version": "0.1.0",
+  "description": "Phase 2 of the Agentic SDLC: turns an approved problem brief into user stories with testable EARS-style acceptance criteria, reviewed by a requirements-reviewer agent.",
+  "author": { "name": "Tito", "email": "pino.islas@gmail.com" },
+  "license": "MIT",
+  "keywords": ["sdlc","requirements","user-stories","acceptance-criteria","product-owner"],
+  "dependencies": ["sdlc-core"]
+}

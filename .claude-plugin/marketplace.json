@@ -1,0 +1,65 @@
+{
+  "name": "agentic-sdlc",
+  "description": "Agentic SDLC: a conductor plus 10 phase plugins that take a feature from idea to deployment with human approval gates.",
+  "owner": {
+    "name": "Tito",
+    "email": "pino.islas@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "sdlc-core",
+      "source": "./plugins/sdlc-core",
+      "description": "Backbone of the Agentic SDLC: a conductor that routes work through 10 phases, a state file that remembers where every project stands, human approval gates, and hooks that stop phases being skipped."
+    },
+    {
+      "name": "sdlc-discovery",
+      "source": "./plugins/sdlc-discovery",
+      "description": "Phase 1 of the Agentic SDLC: interviews you about an idea and produces a problem brief with hypothesis, success metric, constraints and scope."
+    },
+    {
+      "name": "sdlc-requirements",
+      "source": "./plugins/sdlc-requirements",
+      "description": "Phase 2 of the Agentic SDLC: turns an approved problem brief into user stories with testable EARS-style acceptance criteria, reviewed by a requirements-reviewer agent."
+    },
+    {
+      "name": "sdlc-design",
+      "source": "./plugins/sdlc-design",
+      "description": "Phase 3 of the Agentic SDLC: drafts a technical design and ADRs from approved requirements by reading the real codebase, then has a design-reviewer agent challenge it."
+    },
+    {
+      "name": "sdlc-planning",
+      "source": "./plugins/sdlc-planning",
+      "description": "Phase 4 of the Agentic SDLC: breaks an approved design into small, sequenced, traceable tasks with definitions of done, ready for sprint planning and optional Jira/Linear sync."
+    },
+    {
+      "name": "sdlc-build",
+      "source": "./plugins/sdlc-build",
+      "description": "Phase 5 of the Agentic SDLC: implements one planned task at a time with tests first, small diffs, traceable commits and a PR, keeping a build log."
+    },
+    {
+      "name": "sdlc-qa",
+      "source": "./plugins/sdlc-qa",
+      "description": "Phase 6 of the Agentic SDLC: derives test cases from acceptance criteria, automates them, runs them, and reports coverage and gaps back into requirements."
+    },
+    {
+      "name": "sdlc-review",
+      "source": "./plugins/sdlc-review",
+      "description": "Phase 7 of the Agentic SDLC: AI first-pass pull request review against requirements and design, plus an OWASP-based security checklist, ending in a human merge sign-off."
+    },
+    {
+      "name": "sdlc-release",
+      "source": "./plugins/sdlc-release",
+      "description": "Phase 8 of the Agentic SDLC: release planning with feature flags, staged rollout and rollback, business-facing release notes, and a CI/CD pipeline fixer."
+    },
+    {
+      "name": "sdlc-ops",
+      "source": "./plugins/sdlc-ops",
+      "description": "Phase 9 of the Agentic SDLC: post-release monitoring summaries and incident root-cause analyses that feed follow-up acceptance criteria back into requirements."
+    },
+    {
+      "name": "sdlc-knowledge",
+      "source": "./plugins/sdlc-knowledge",
+      "description": "Phase 10 of the Agentic SDLC: captures retrospectives and delivery metrics, and turns agreed lessons into standing rules in CLAUDE.md so every future agent follows them."
+    }
+  ]
+}

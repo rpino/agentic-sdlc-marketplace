@@ -1,0 +1,10 @@
+{
+  "name": "sdlc-release",
+  "displayName": "SDLC 8 · Release",
+  "version": "0.1.0",
+  "description": "Phase 8 of the Agentic SDLC: release planning with feature flags, staged rollout and rollback, business-facing release notes, and a CI/CD pipeline fixer.",
+  "author": { "name": "Tito", "email": "pino.islas@gmail.com" },
+  "license": "MIT",
+  "keywords": ["sdlc","release","ci-cd","release-notes","feature-flags","devops"],
+  "dependencies": ["sdlc-core"]
+}
