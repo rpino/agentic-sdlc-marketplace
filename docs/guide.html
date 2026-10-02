@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agentic SDLC Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: reference manual — sticky contents rail on the left, one 70ch reading column; pipeline rail as the signature graphic. */
+:root {
+  --bg: #F5F6F3;
+  --surface: #FFFFFF;
+  --sunken: #ECEEE9;
+  --ink: #17211D;
+  --muted: #56625C;
+  --line: #D7DBD4;
+  --accent: #1D6B57;      /* pine: approved / the gate */
+  --accent-soft: #DCEBE5;
+  --review: #9A6412;      /* amber: in_review */
+  --review-soft: #F5E9D3;
+  --reopen: #A23B32;      /* brick: reopened / blocked */
+  --reopen-soft: #F5DFDC;
+  --code-bg: #EEF0EB;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121815; --surface: #19211D; --sunken: #0E1311; --ink: #E3E9E5; --muted: #9AA8A1;
+    --line: #2B3631; --accent: #5DBF9F; --accent-soft: #1B3A30; --review: #E0AC57; --review-soft: #3A2E18;
+    --reopen: #E7827A; --reopen-soft: #3D211E; --code-bg: #1E2723; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121815; --surface: #19211D; --sunken: #0E1311; --ink: #E3E9E5; --muted: #9AA8A1;
+  --line: #2B3631; --accent: #5DBF9F; --accent-soft: #1B3A30; --review: #E0AC57; --review-soft: #3A2E18;
+  --reopen: #E7827A; --reopen-soft: #3D211E; --code-bg: #1E2723; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 15.5px/1.65 var(--font-body);
+  padding-inline: 16px;
+}
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+
+.shell { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 56px; padding-block: 40px 96px; }
+@media (max-width: 900px) { .shell { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-block: 24px 64px; } }
+
+/* contents rail */
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; font-size: 13.5px; }
+nav.toc .label { font: 600 11px/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; counter-reset: toc; }
+nav.toc li { counter-increment: toc; }
+nav.toc a { display: flex; gap: 10px; padding: 5px 8px; border-radius: 4px; color: var(--ink); text-decoration: none; }
+nav.toc a::before { content: counter(toc, decimal-leading-zero); font: 500 11px/1.9 var(--font-mono); color: var(--muted); }
+nav.toc a:hover { background: var(--sunken); }
+@media (max-width: 900px) {
+  nav.toc { position: static; border: 1px solid var(--line); border-radius: 6px; padding: 14px; background: var(--surface); }
+  nav.toc ol { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+}
+
+main { min-width: 0; }
+section { padding-block: 8px 40px; border-top: 1px solid var(--line); }
+section:first-of-type { border-top: 0; }
+.prose { max-width: 70ch; }
+
+h1, h2, h3 { font-family: var(--font-display); font-weight: 650; text-wrap: balance; line-height: 1.2; }
+h1 { font-size: clamp(2rem, 4.4vw, 2.9rem); margin: 6px 0 14px; letter-spacing: -.01em; }
+h2 { font-size: 1.65rem; margin: 28px 0 12px; }
+h3 { font-size: 1.18rem; margin: 26px 0 8px; }
+h4 { font: 600 12px/1.3 var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 18px 0 6px; }
+p { margin: 0 0 14px; }
+.eyebrow { font: 600 11.5px/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.lede { font-size: 1.12rem; color: var(--muted); max-width: 62ch; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--muted); margin-top: 18px; }
+.meta code { font-size: 12.5px; }
+
+code, pre, kbd { font-family: var(--font-mono); }
+code { font-size: .86em; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; overflow-x: auto; font-size: 13px; line-height: 1.55; margin: 0 0 16px; }
+pre code { background: none; padding: 0; font-size: inherit; overflow-wrap: normal; }
+.cmt { color: var(--muted); }
+
+.table-wrap { overflow-x: auto; margin: 0 0 18px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font: 600 11.5px/1.3 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--sunken); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+
+/* status chips */
+.chip { display: inline-block; font: 500 11.5px/1 var(--font-mono); padding: 4px 7px; border-radius: 3px; white-space: nowrap; border: 1px solid var(--line); color: var(--muted); background: var(--surface); }
+.chip.draft { border-style: dashed; color: var(--ink); }
+.chip.review { color: var(--review); background: var(--review-soft); border-color: transparent; }
+.chip.ok { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+.chip.reopen { color: var(--reopen); background: var(--reopen-soft); border-color: transparent; }
+
+/* Pipeline rail: the signature graphic */
+.pipeline { overflow-x: auto; margin: 22px 0 10px; padding-bottom: 6px; }
+.rail { display: grid; grid-template-columns: repeat(10, minmax(92px, 1fr)); min-width: 980px; position: relative; }
+.rail::before { content: ""; position: absolute; left: 0; right: 0; top: 23px; height: 2px; background: var(--line); }
+.stop { position: relative; display: grid; justify-items: center; text-align: center; gap: 6px; padding-inline: 4px; text-decoration: none; color: var(--ink); }
+.stop .n { width: 34px; height: 34px; margin-top: 6px; border-radius: 50%; display: grid; place-items: center; font: 500 13px/1 var(--font-mono); background: var(--surface); border: 2px solid var(--ink); position: relative; z-index: 1; }
+.stop:hover .n { background: var(--accent-soft); border-color: var(--accent); }
+.stop .t { font-weight: 600; font-size: 13.5px; line-height: 1.25; }
+.stop .gate { font: 500 10.5px/1.2 var(--font-mono); color: var(--accent); letter-spacing: .02em; display: flex; align-items: center; gap: 4px; }
+.stop .gate::before { content: ""; width: 7px; height: 7px; border: 1.5px solid currentColor; transform: rotate(45deg); }
+.stop .who { font-size: 11.5px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--muted); align-items: center; }
+
+/* principles */
+.principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); margin: 6px 0 18px; }
+.principles div { padding: 16px 18px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); min-width: 0; }
+.principles b { display: block; font-family: var(--font-display); font-size: 1.05rem; margin-bottom: 4px; }
+.principles span { font-size: 14px; color: var(--muted); }
+
+/* lifecycle */
+.lifecycle { overflow-x: auto; margin: 6px 0 18px; }
+.lifecycle svg { display: block; min-width: 640px; width: 100%; height: auto; }
+.lifecycle text { font-family: var(--font-mono); font-size: 12px; fill: var(--ink); }
+.lifecycle .lbl { font-family: var(--font-body); font-size: 11.5px; fill: var(--muted); }
+
+/* steps */
+ol.steps { list-style: none; margin: 0 0 18px; padding: 0; counter-reset: s; display: grid; gap: 10px; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; }
+ol.steps li::before { content: counter(s); font: 500 12.5px/26px var(--font-mono); text-align: center; height: 26px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); }
+ol.steps li.stop-step::before { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+/* phase sheets */
+.phase { border: 1px solid var(--line); border-radius: 6px; background: var(--surface); margin: 0 0 18px; scroll-margin-top: 20px; }
+.phase header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.phase header .num { font: 500 13px/1 var(--font-mono); color: var(--muted); }
+.phase header h3 { margin: 0; font-size: 1.22rem; }
+.phase header .plug { font: 400 12.5px/1 var(--font-mono); color: var(--muted); margin-left: auto; }
+.phase .body { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+.phase .body > div { padding: 14px 18px; min-width: 0; }
+.phase .body > div + div { border-left: 1px solid var(--line); background: var(--sunken); }
+@media (max-width: 700px) { .phase .body { grid-template-columns: minmax(0, 1fr); } .phase .body > div + div { border-left: 0; border-top: 1px solid var(--line); } }
+.phase ul { margin: 0 0 8px; padding-left: 18px; }
+.phase li { margin-bottom: 4px; font-size: 14.5px; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 12px; font-size: 13.5px; margin: 0; }
+.kv dt { color: var(--muted); font-weight: 500; }
+.kv dd { margin: 0; min-width: 0; }
+.gateline { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 13.5px; }
+.gateline strong { color: var(--accent); }
+
+/* trace chain */
+.trace { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 18px; }
+.trace .id { font: 500 13px/1 var(--font-mono); padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); }
+.trace .id small { display: block; font: 400 10.5px/1.2 var(--font-body); color: var(--muted); margin-top: 4px; }
+.trace .arr { color: var(--muted); font-family: var(--font-mono); }
+
+/* callouts */
+.note { border-left: 3px solid var(--review); background: var(--review-soft); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 0 0 16px; font-size: 14.5px; max-width: 75ch; }
+.note.warn { border-left-color: var(--reopen); background: var(--reopen-soft); }
+.note p:last-child { margin: 0; }
+
+/* copy blocks */
+.copyblock { position: relative; }
+.copyblock button { position: absolute; top: 8px; right: 8px; font: 500 11.5px/1 var(--font-body); padding: 6px 9px; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.copyblock button:hover { border-color: var(--accent); color: var(--accent); }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.two > * { min-width: 0; }
+footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" aria-label="Contents">
+    <div class="label">Contents</div>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#pipeline">The ten phases</a></li>
+      <li><a href="#repo">Repository layout</a></li>
+      <li><a href="#core">sdlc-core</a></li>
+      <li><a href="#lifecycle">Phase lifecycle</a></li>
+      <li><a href="#hooks">Hooks &amp; gates</a></li>
+      <li><a href="#phases">Phase plugins</a></li>
+      <li><a href="#artifacts">Artifacts &amp; traceability</a></li>
+      <li><a href="#state">State file</a></li>
+      <li><a href="#cli">State script CLI</a></li>
+      <li><a href="#install">Install &amp; use</a></li>
+      <li><a href="#extend">Extending</a></li>
+      <li><a href="#limits">Known limitations</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <!-- 1 -->
+    <section id="overview">
+      <div class="eyebrow">Claude Code plugin marketplace · v0.1.0</div>
+      <h1>Agentic SDLC Marketplace</h1>
+      <p class="lede">A conductor plus ten phase plugins that take a feature from idea to deployment. Agents draft every phase. A named person approves each one before the next phase can start.</p>
+      <div class="meta">
+        <span>Marketplace name <code>agentic-sdlc</code></span>
+        <span>Repo <code>rpino/agentic-sdlc-marketplace</code></span>
+        <span>11 plugins · 20 skills · 2 agents · 2 hooks</span>
+        <span>Requires <code>python3</code> (stdlib only)</span>
+        <span>MIT</span>
+      </div>
+
+      <div class="prose">
+        <h2>What it does</h2>
+        <p>Claude Code is good at writing code, but on its own it will happily skip straight from a vague idea to an implementation. This marketplace puts a delivery process around it. Every feature passes through Discovery, Requirements, Design, Planning, Build, QA, Review, Release, Operate and Knowledge, in that order. Each phase produces a markdown artifact in <code>docs/</code>, and that artifact is the input to the next phase.</p>
+        <p>You drive the whole thing with four commands. The conductor works out which phase is current, runs that phase's skills, records questions that need a human answer, and then stops and waits for approval. Python hooks enforce the rules the prompts ask for, so an agent can't write production code before the plan is approved or edit the state file to approve itself.</p>
+      </div>
+
+      <h3>Principles</h3>
+      <div class="principles">
+        <div><b>AI drafts, humans decide</b><span>Every phase ends at a gate approved by a named person. The agent never approves.</span></div>
+        <div><b>Artifacts are the contract</b><span>Each phase's output document is the next phase's input.</span></div>
+        <div><b>Traceability end to end</b><span>US → AC → design → task → test → PR → release → RCA.</span></div>
+        <div><b>Feedback loops are normal</b><span>A later phase that finds a gap reopens the earlier phase instead of patching around it.</span></div>
+        <div><b>Lessons compound</b><span>Adopted retro lessons become standing rules in <code>CLAUDE.md</code> that every future agent follows.</span></div>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section id="pipeline">
+      <h2>The ten phases</h2>
+      <p class="prose">Phases run strictly in order. Each one ends at a gate, shown as a diamond, with the role that must approve it. Select a phase to jump to its details.</p>
+      <div class="pipeline" role="list">
+        <div class="rail">
+          <a class="stop" role="listitem" href="#ph-discovery"><span class="n">1</span><span class="t">Discovery</span><span class="gate">GATE</span><span class="who">Product Owner</span></a>
+          <a class="stop" role="listitem" href="#ph-requirements"><span class="n">2</span><span class="t">Requirements</span><span class="gate">GATE</span><span class="who">Product Owner</span></a>
+          <a class="stop" role="listitem" href="#ph-design"><span class="n">3</span><span class="t">Design</span><span class="gate">GATE</span><span class="who">Tech Lead</span></a>
+          <a class="stop" role="listitem" href="#ph-planning"><span class="n">4</span><span class="t">Planning</span><span class="gate">GATE</span><span class="who">Team</span></a>
+          <a class="stop" role="listitem" href="#ph-build"><span class="n">5</span><span class="t">Build</span><span class="gate">GATE</span><span class="who">Tech Lead</span></a>
+          <a class="stop" role="listitem" href="#ph-qa"><span class="n">6</span><span class="t">QA</span><span class="gate">GATE</span><span class="who">QA Lead</span></a>
+          <a class="stop" role="listitem" href="#ph-review"><span class="n">7</span><span class="t">Review</span><span class="gate">GATE</span><span class="who">Tech Lead</span></a>
+          <a class="stop" role="listitem" href="#ph-release"><span class="n">8</span><span class="t">Release</span><span class="gate">GATE</span><span class="who">Product Owner</span></a>
+          <a class="stop" role="listitem" href="#ph-operate"><span class="n">9</span><span class="t">Operate</span><span class="gate">GATE</span><span class="who">Product Owner</span></a>
+          <a class="stop" role="listitem" href="#ph-knowledge"><span class="n">10</span><span class="t">Knowledge</span><span class="gate">GATE</span><span class="who">Team</span></a>
+        </div>
+      </div>
+      <p class="prose" style="font-size:14px;color:var(--muted)">Code paths unlock only after the Planning gate (phase 4) is approved. That is the hook-enforced line between thinking and building.</p>
+    </section>
+
+    <!-- 3 -->
+    <section id="repo">
+      <h2>Repository layout</h2>
+      <p class="prose">One catalog file lists every plugin. Each plugin is a folder with a manifest, skills, optional reviewer agents, and the templates its skills fill in. Only <code>sdlc-core</code> contains executable code.</p>
+<pre><code>agentic-sdlc-marketplace/
+├── .claude-plugin/
+│   └── marketplace.json        <span class="cmt"># the catalog: name "agentic-sdlc", 11 plugin entries</span>
+├── docs/process.md             <span class="cmt"># human-readable process definition</span>
+├── README.md · LICENSE · .gitignore
+└── plugins/
+    ├── sdlc-core/              <span class="cmt"># the backbone</span>
+    │   ├── .claude-plugin/plugin.json
+    │   ├── hooks/hooks.json    <span class="cmt"># SessionStart + PreToolUse</span>
+    │   ├── scripts/
+    │   │   ├── sdlc_state.py   <span class="cmt"># state machine, single source of truth (~530 lines)</span>
+    │   │   ├── sdlc_gate.py    <span class="cmt"># PreToolUse enforcement</span>
+    │   │   └── sdlc_session.py <span class="cmt"># SessionStart context injection</span>
+    │   ├── skills/
+    │   │   ├── conductor/      <span class="cmt"># the orchestrator (model-invoked)</span>
+    │   │   ├── init/ next/ approve/ status/ reopen/
+    │   └── templates/project-CLAUDE.md
+    ├── sdlc-discovery/         <span class="cmt"># skills/idea-interviewer, templates/problem-brief.md</span>
+    ├── sdlc-requirements/      <span class="cmt"># skills/spec-writer, acceptance-criteria; agents/requirements-reviewer</span>
+    ├── sdlc-design/            <span class="cmt"># skills/design-drafter; agents/design-reviewer; templates/design.md, adr.md</span>
+    ├── sdlc-planning/          <span class="cmt"># skills/task-breakdown</span>
+    ├── sdlc-build/             <span class="cmt"># skills/task-executor</span>
+    ├── sdlc-qa/                <span class="cmt"># skills/qa-from-acceptance-criteria</span>
+    ├── sdlc-review/            <span class="cmt"># skills/pr-reviewer, security-checklist</span>
+    ├── sdlc-release/           <span class="cmt"># skills/release-notes, pipeline-fixer</span>
+    ├── sdlc-ops/               <span class="cmt"># skills/incident-summarizer</span>
+    └── sdlc-knowledge/         <span class="cmt"># skills/retro-capture, knowledge-updater</span></code></pre>
+
+      <h3>How Claude Code reads it</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>File</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td><code>.claude-plugin/marketplace.json</code></td><td>Catalog. <code>/plugin marketplace add</code> reads it to learn the marketplace name, the owner, and where each plugin's <code>source</code> folder is.</td></tr>
+          <tr><td><code>plugins/*/.claude-plugin/plugin.json</code></td><td>Plugin manifest: name, display name, version, author, license, keywords.</td></tr>
+          <tr><td><code>skills/&lt;name&gt;/SKILL.md</code></td><td>A skill. Frontmatter <code>name</code> and <code>description</code> decide when Claude uses it. It is invoked as <code>/&lt;plugin&gt;:&lt;skill&gt;</code>. Skills with <code>disable-model-invocation: true</code> (init, next, approve) only run when a person types the command.</td></tr>
+          <tr><td><code>agents/*.md</code></td><td>Subagents with a restricted toolset (<code>Read, Grep, Glob</code>). The reviewers can read the draft but cannot change it.</td></tr>
+          <tr><td><code>hooks/hooks.json</code></td><td>Registers the Python hooks. <code>${CLAUDE_PLUGIN_ROOT}</code> resolves to the installed plugin's folder.</td></tr>
+          <tr><td><code>templates/*.md</code></td><td>Skeletons that skills fill in, referenced as <code>${CLAUDE_PLUGIN_ROOT}/templates/…</code>.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 4 -->
+    <section id="core">
+      <h2>sdlc-core: the backbone</h2>
+      <p class="prose">Every phase plugin depends on <code>sdlc-core</code>. It has three parts: a state machine that remembers where the project is, a conductor skill that runs the work, and hooks that enforce the rules.</p>
+
+      <h3>The commands you use</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Command</th><th>Who runs it</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>/sdlc-core:init "Name" [approver]</code></td><td>Person only</td><td>Creates <code>.sdlc/state.json</code>, the <code>docs/01…10</code> folders and a project <code>CLAUDE.md</code>, then starts Discovery right away.</td></tr>
+          <tr><td><code>/sdlc-core:next [notes]</code></td><td>Person only</td><td>Runs the next step of the current phase. If the phase is <span class="chip review">in_review</span> and you add notes, they count as review feedback: the phase goes back to <span class="chip draft">draft</span>, gets revised, and is resubmitted.</td></tr>
+          <tr><td><code>/sdlc-core:approve [phase] [--note]</code></td><td>Person only</td><td><strong>The human gate.</strong> Shows an approval summary, confirms who is approving, records the approval, and names the next phase. It does not start that phase.</td></tr>
+          <tr><td><code>/sdlc-core:status</code></td><td>Anyone</td><td>Shows every phase's status, who approved what, open issues, and who needs to act next.</td></tr>
+          <tr><td><code>/sdlc-core:reopen &lt;phase&gt; "reason"</code></td><td>Person or agent</td><td>Sends work back to an earlier phase when a later one finds a gap, and records the gap as an open issue.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>The conductor loop</h3>
+      <p class="prose">The <code>sdlc-core:conductor</code> skill orchestrates. It doesn't do the phase work itself. It reads the state, routes to the right skills, and stops at the gate. <code>next</code> and <code>init</code> both hand off to it.</p>
+      <ol class="steps prose">
+        <li><span><strong>Read state.</strong> Run <code>sdlc_state.py next --json</code>, which returns the phase, its status, its skills and agents, the expected artifacts, the gate, the approver and any open issues.</span></li>
+        <li><span><strong>Branch on status.</strong> <span class="chip review">in_review</span>: stop and name the approver. <span class="chip reopen">reopened</span>: ask for the missing decisions and resolve the issues. <span class="chip">not_started</span> or <span class="chip draft">draft</span>: continue.</span></li>
+        <li><span><strong>Mark in progress:</strong> <code>set-status &lt;phase&gt; draft</code>.</span></li>
+        <li><span><strong>Run the phase skills in order</strong>, feeding each one the previous phase's approved artifacts. Then run the reviewer agent, if the phase has one, and fold in its findings. If the phase plugin isn't installed, follow the built-in phase contract instead.</span></li>
+        <li><span><strong>Record human decisions</strong> as open issues (<code>issue add</code>). Scope, priority, business rules and risk acceptance belong to people.</span></li>
+        <li><span><strong>Submit for review:</strong> <code>set-status &lt;phase&gt; in_review --artifact &lt;path&gt;</code>.</span></li>
+        <li class="stop-step"><span><strong>Stop and hand over</strong> in 3–6 lines: what was produced, where it is, open issues, who approves, and the exact <code>/sdlc-core:approve</code> command.</span></li>
+      </ol>
+      <div class="note"><p><strong>Hard rules in the conductor:</strong> one phase at a time, never approve, never edit the state file by hand, reopen instead of patching gaps, and every artifact references the IDs of the one before it.</p></div>
+    </section>
+
+    <!-- 5 -->
+    <section id="lifecycle">
+      <h2>Phase lifecycle</h2>
+      <p class="prose">Every phase has one of five statuses. <code>sdlc_state.py</code> enforces each transition, so the agent can't jump straight to approved even if it tries.</p>
+      <div class="lifecycle" aria-label="Phase status transitions">
+        <svg viewBox="0 0 760 220" role="img">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker>
+          </defs>
+          <!-- nodes -->
+          <rect x="10" y="40" width="120" height="40" rx="4" style="fill:var(--surface);stroke:var(--line);stroke-width:1.5"/>
+          <text x="70" y="65" text-anchor="middle">not_started</text>
+          <rect x="200" y="40" width="110" height="40" rx="4" style="fill:var(--surface);stroke:var(--ink);stroke-width:1.5;stroke-dasharray:5 3"/>
+          <text x="255" y="65" text-anchor="middle">draft</text>
+          <rect x="390" y="40" width="120" height="40" rx="4" style="fill:var(--review-soft);stroke:var(--review);stroke-width:1.5"/>
+          <text x="450" y="65" text-anchor="middle" style="fill:var(--review)">in_review</text>
+          <rect x="610" y="40" width="130" height="40" rx="4" style="fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5"/>
+          <text x="675" y="65" text-anchor="middle" style="fill:var(--accent)">approved</text>
+          <rect x="390" y="160" width="120" height="40" rx="4" style="fill:var(--reopen-soft);stroke:var(--reopen);stroke-width:1.5"/>
+          <text x="450" y="185" text-anchor="middle" style="fill:var(--reopen)">reopened</text>
+          <!-- edges -->
+          <line x1="130" y1="60" x2="198" y2="60" style="stroke:var(--muted);stroke-width:1.5" marker-end="url(#ar)"/>
+          <text class="lbl" x="164" y="50" text-anchor="middle">conductor</text>
+          <path d="M310,54 L388,54" style="stroke:var(--muted);stroke-width:1.5;fill:none" marker-end="url(#ar)"/>
+          <text class="lbl" x="349" y="32" text-anchor="middle">submit</text>
+          <path d="M390,70 C360,96 340,96 312,70" style="stroke:var(--muted);stroke-width:1.5;fill:none" marker-end="url(#ar)"/>
+          <text class="lbl" x="351" y="106" text-anchor="middle">feedback</text>
+          <line x1="510" y1="60" x2="608" y2="60" style="stroke:var(--accent);stroke-width:2.5" marker-end="url(#ar)"/>
+          <text class="lbl" x="559" y="32" text-anchor="middle" style="fill:var(--accent);font-weight:600">human approves</text>
+          <text class="lbl" x="559" y="48" text-anchor="middle">/sdlc-core:approve</text>
+          <path d="M675,80 C675,170 600,180 512,180" style="stroke:var(--reopen);stroke-width:1.5;fill:none" marker-end="url(#ar)"/>
+          <text class="lbl" x="660" y="160" text-anchor="end">later phase finds a gap</text>
+          <path d="M405,160 C330,140 280,120 262,82" style="stroke:var(--muted);stroke-width:1.5;fill:none" marker-end="url(#ar)"/>
+          <text class="lbl" x="300" y="150" text-anchor="middle">revise</text>
+        </svg>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Rule</th><th>Enforced by</th></tr></thead>
+        <tbody>
+          <tr><td>A phase can't move to <code>draft</code> or <code>in_review</code> until the previous phase is <code>approved</code>.</td><td><code>set-status</code> refuses</td></tr>
+          <tr><td><code>set-status</code> only accepts <code>draft</code> and <code>in_review</code>. Approving and reopening have their own commands.</td><td><code>set-status</code> refuses</td></tr>
+          <tr><td>Only an <code>in_review</code> phase can be approved, and only with a non-empty <code>--by NAME</code>.</td><td><code>approve</code> refuses</td></tr>
+          <tr><td>Open issues block approval unless the approver passes <code>--accept-open-issues</code>.</td><td><code>approve</code> refuses</td></tr>
+          <tr><td>The current phase is always the earliest phase that isn't approved, so a reopened phase is automatically next. Downstream phases keep their status.</td><td><code>next_phase()</code></td></tr>
+          <tr><td>Only a person moves a phase to approved.</td><td>The conductor skill and <code>disable-model-invocation</code> on <code>approve</code></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 6 -->
+    <section id="hooks">
+      <h2>Hooks &amp; gates</h2>
+      <p class="prose">Prompts ask the agent to follow the rules. Hooks make sure it does. Both hooks run only inside a project that has a <code>.sdlc/state.json</code>, found by walking up from the working directory. Everywhere else they do nothing.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Event</th><th>Script</th><th>Rule</th></tr></thead>
+        <tbody>
+          <tr><td><code>SessionStart</code><br><span style="font-size:12px;color:var(--muted)">startup · resume · clear · compact</span></td><td><code>sdlc_session.py</code></td><td>Adds the project name, current phase and status, and any open issues to Claude's context, along with an instruction to follow the conductor. Any session on any day knows where the project stands.</td></tr>
+          <tr><td rowspan="3"><code>PreToolUse</code><br><span style="font-size:12px;color:var(--muted)">Write · Edit · MultiEdit · NotebookEdit · Bash</span></td><td rowspan="3"><code>sdlc_gate.py</code></td><td><strong>State file is script-only.</strong> Denies Write/Edit on <code>.sdlc/state.json</code>, and Bash commands that mention it with <code>&gt;</code>, <code>tee</code>, <code>sed -i</code>, <code>mv</code>, <code>cp</code>, <code>rm</code> or <code>python -c</code> unless they go through <code>sdlc_state.py</code>.</td></tr>
+          <tr><td><strong>No code before a plan.</strong> Denies writes under <code>settings.code_paths</code> until <code>planning</code> is <code>approved</code>.<br><span style="font-size:13px;color:var(--muted)">Default paths: <code>src/ app/ lib/ services/ packages/ api/ web/ tests/ test/</code></span></td></tr>
+          <tr><td><strong>Tests with every commit.</strong> On <code>git commit</code>, reads the staged files (plus unstaged files for <code>-a</code>) and denies the commit if code changed but no test file did.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="prose">A denial is returned as a <code>permissionDecision: "deny"</code> whose reason is prefixed <code>[Agentic SDLC gate]</code>, so Claude sees why it was blocked and what to do instead.</p>
+    </section>
+
+    <!-- 7 -->
+    <section id="phases">
+      <h2>Phase plugins</h2>
+      <p class="prose">Each phase plugin is made of prompts: skills, an optional reviewer agent, and templates. Each skill also works on its own outside a managed project, for example <code>/sdlc-review:pr-reviewer 142</code>.</p>
+
+      <article class="phase" id="ph-discovery">
+        <header><span class="num">01</span><h3>Discovery</h3><span class="plug">sdlc-discovery</span></header>
+        <div class="body">
+          <div>
+            <h4>idea-interviewer</h4>
+            <ul>
+              <li>Asks one question at a time, about 8 at most: problem and evidence, who is affected, why now, outcome and metric, constraints, what's out of scope, risks and assumptions.</li>
+              <li>Doesn't propose solutions. This phase is only about the problem.</li>
+              <li>Writes "Unknown — open question" instead of inventing facts. The brief stays to one page.</li>
+            </ul>
+          </div>
+          <div>
+            <dl class="kv"><dt>Input</dt><dd>The raw idea</dd><dt>Output</dt><dd><code>docs/01-discovery/problem-brief.md</code></dd></dl>
+            <div class="gateline"><strong>Gate</strong> · Product Owner and stakeholder agree the problem is worth solving.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase" id="ph-requirements">
+        <header><span class="num">02</span><h3>Requirements</h3><span class="plug">sdlc-requirements</span></header>
+        <div class="body">
+          <div>
+            <h4>spec-writer → acceptance-criteria → requirements-reviewer</h4>
+            <ul>
+              <li><strong>spec-writer:</strong> user stories <code>US-n</code> (INVEST, Must/Should/Could), measurable <code>NFR-n</code>, business rules <code>BR-n</code>, out of scope, open questions. Avoids solution language and vague words.</li>
+              <li><strong>acceptance-criteria:</strong> <code>AC-n.m</code> in EARS form (<em>WHEN / WHILE / IF … THEN / WHERE … THE SYSTEM SHALL …</em>; Gherkin is also accepted). A coverage checklist covers the happy path, validation, permissions, state conflicts, dependency errors, user-visible messages and audit. Ends with a traceability table.</li>
+              <li><strong>requirements-reviewer</strong> (read-only agent): looks for ambiguity, missing edge cases, untestable criteria, scope creep and missing business rules.</li>
+            </ul>
+          </div>
+          <div>
+            <dl class="kv"><dt>Input</dt><dd>Approved problem brief</dd><dt>Output</dt><dd><code>docs/02-requirements/requirements.md</code></dd></dl>
+            <div class="gateline"><strong>Gate</strong> · Product Owner approves the stories and testable acceptance criteria.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase" id="ph-design">
+        <header><span class="num">03</span><h3>Design</h3><span class="plug">sdlc-design</span></header>
+        <div class="body">
+          <div>
+            <h4>design-drafter → design-reviewer</h4>
+            <ul>
+              <li>Reads the real codebase before proposing anything. Covers components, data model, APIs, sequence flows, edge cases, and a map from each AC to the design element that satisfies it.</li>
+              <li>Writes ADRs for significant decisions.</li>
+              <li><strong>design-reviewer</strong> (read-only agent) challenges integration assumptions, data-model risks, failure modes, security, scalability, over-engineering and requirement coverage.</li>
+            </ul>
+          </div>
+          <div>
+            <dl class="kv"><dt>Input</dt><dd>Approved requirements</dd><dt>Output</dt><dd><code>docs/03-design/design.md</code>, <code>adr/ADR-nnn-*.md</code></dd></dl>
+            <div class="gateline"><strong>Gate</strong> · Tech Lead approves the design and ADRs.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase" id="ph-planning">
+        <header><span class="num">04</span><h3>Planning</h3><span class="plug">sdlc-planning</span></header>
+        <div class="body">
+          <div>
+            <h4>task-breakdown</h4>
+            <ul>
+              <li>Tasks <code>T-n</code> that are small (one PR, about a day or less), vertical, traceable to AC IDs, verifiable with their own definition of done, and ordered with <code>depends on</code> links.</li>
+              <li>Adds cross-cutting tasks the design implies: migrations, feature flag, telemetry, docs, config. Groups tasks into milestones and estimates them; the estimates are marked as the agent's guesses.</li>
+              <li>A coverage check confirms every AC has at least one task. Creating Jira, Linear or Azure DevOps tickets is optional and only happens if you ask.</li>
+            </ul>
+          </div>
+          <div>
+            <dl class="kv"><dt>Input</dt><dd>Requirements and design</dd><dt>Output</dt><dd><code>docs/04-planning/tasks.md</code></dd></dl>
+            <div class="gateline"><strong>Gate</strong> · The team agrees tasks, sequence and priorities. <em>Approving this gate unlocks the code paths.</em></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase" id="ph-build">
+        <header><span class="num">05</span><h3>Build</h3><span class="plug">sdlc-build</span></header>
+        <div class="body">
+          <div>
+            <h4>task-executor (one task at a time)</h4>
+            <ul>
+              <li>Reads the task, its ACs and the relevant design sections, plus the code it will touch and the <code>CLAUDE.md</code> standing rules. Works on a <code>feature/&lt;task-id&gt;-&lt;slug&gt;</code> branch.</li>
+              <li>Test first: writes failing tests named after ACs (<code>test_ac_1_2_…</code>), makes the smallest change that passes, runs the suite and linters, then reviews its own diff.</li>
+              <li>Commits as <code>T-3: … (AC-1.1, AC-1.2)</code>, opens a PR, updates <code>tasks.md</code> and the build log, then <strong>stops</strong> so a developer can review.</li>
+              <li>If the design or an AC turns out to be wrong, it reopens that phase instead of improvising.</li>
+            </ul>
+          </div>
+          <div>
+            <dl class="kv"><dt>Input</dt><dd>Approved tasks</dd><dt>Output</dt><dd>Code, tests, PRs, <code>docs/05-build/build-log.md</code></dd></dl>
+            <div class="gateline"><strong>Gate</strong> · Tech Lead confirms every task diff has been reviewed and all tasks are done.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase" id="ph-qa">
+        <header><span class="num">06</span><h3>QA</h3><span class="plug">sdlc-qa</span></header>
+        <div class="body">
+          <div>
+            <h4>qa-from-acceptance-criteria</h4>
+            <ul>
+              <li>Writes at least one <code>TC-n</code> per AC, with negative and boundary cases (limits ±1, empty, duplicates, concurrency, time zones).</li>
+              <li>Does an exploratory pass as a real user and as a malicious one. Automates missing tests in the project's own framework, runs the suite, and logs defects <code>DEF-n</code>.</li>
+              <li>Gaps go back upstream: it reopens Requirements instead of inventing the rule. It also flags false greens, meaning tests that assert nothing or mock the thing under test.</li>
+            </ul>
+          </div>
+          <div>
+            <dl class="kv"><dt>Input</dt><dd>Requirements, design, built code</dd><dt>Output</dt><dd><code>docs/06-qa/test-cases.md</code>, <code>test-report.md</code></dd></dl>
+            <div class="gateline"><strong>Gate</strong> · QA Lead confirms every AC has a passing test.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase" id="ph-review">
+        <header><span class="num">07</span><h3>Review</h3><span class="plug">sdlc-review</span></header>
+        <div class="body">
+          <div>
+            <h4>pr-reviewer → security-checklist</h4>
+            <ul>
+              <li><strong>pr-reviewer:</strong> first-pass review of each PR against its task, ACs and design: correctness, tests, readability, conventions, performance and risk, ranked by severity.</li>
+              <li><strong>security-checklist:</strong> 11 items based on OWASP and ASVS (access control and IDOR, auth, input validation, injection, secrets, PII, dependencies, error handling, audit logging, abuse cases, configuration). Each item gets Pass, Fail or N/A with <code>file:line</code> evidence.</li>
+              <li>Any Critical or High finding must be fixed, or risk-accepted by a named person.</li>
+            </ul>
+          </div>
+          <div>
+            <dl class="kv"><dt>Input</dt><dd>Pull requests</dd><dt>Output</dt><dd><code>docs/07-review/review-report.md</code></dd></dl>
+            <div class="gateline"><strong>Gate</strong> · Tech Lead signs off the merge with no open high-severity findings.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase" id="ph-release">
+        <header><span class="num">08</span><h3>Release</h3><span class="plug">sdlc-release</span></header>
+        <div class="body">
+          <div>
+            <h4>release-notes (+ pipeline-fixer)</h4>
+            <ul>
+              <li><strong>release-notes:</strong> a release plan (feature flag, staged rollout, monitoring, rollback, go/no-go checklist) and release notes for three audiences: business users, support staff and engineers.</li>
+              <li><strong>pipeline-fixer:</strong> reads CI/CD logs, sorts the root cause into code, flaky test, environment, config or dependency, and proposes the smallest fix. It is also useful on its own.</li>
+            </ul>
+          </div>
+          <div>
+            <dl class="kv"><dt>Input</dt><dd>Approved build</dd><dt>Output</dt><dd><code>docs/08-release/release-plan.md</code>, <code>release-notes.md</code></dd></dl>
+            <div class="gateline"><strong>Gate</strong> · Product Owner and stakeholder give go/no-go.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase" id="ph-operate">
+        <header><span class="num">09</span><h3>Operate</h3><span class="plug">sdlc-ops</span></header>
+        <div class="body">
+          <div>
+            <h4>incident-summarizer</h4>
+            <ul>
+              <li><strong>Health check mode:</strong> a post-release monitoring summary.</li>
+              <li><strong>Incident mode:</strong> a blameless RCA with timeline, impact, root cause from 5 whys, the fix, and follow-ups. Follow-ups include new acceptance criteria that go back into Requirements, and candidate standing rules.</li>
+            </ul>
+          </div>
+          <div>
+            <dl class="kv"><dt>Input</dt><dd>The live system</dd><dt>Output</dt><dd><code>docs/09-operate/monitoring.md</code>, <code>RCA-*.md</code></dd></dl>
+            <div class="gateline"><strong>Gate</strong> · Product Owner confirms the rollout is stable or incidents are handled.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase" id="ph-knowledge">
+        <header><span class="num">10</span><h3>Knowledge</h3><span class="plug">sdlc-knowledge</span></header>
+        <div class="body">
+          <div>
+            <h4>retro-capture → knowledge-updater</h4>
+            <ul>
+              <li><strong>retro-capture:</strong> gathers evidence from the state history first. It computes cycle time per phase, the number of feedback loops, gaps caught before production, escaped defects, and an AI catch rate. Then it runs the retro and proposes concrete, checkable rules.</li>
+              <li><strong>knowledge-updater:</strong> writes only the rules the team adopted into <code>CLAUDE.md</code>'s "Standing rules" section. It removes duplicates and cites the source, for example <code>(RCA-2026-031)</code>. It can also draft improvements to the marketplace's own skills for you to review.</li>
+            </ul>
+          </div>
+          <div>
+            <dl class="kv"><dt>Input</dt><dd>Everything from the run</dd><dt>Output</dt><dd><code>docs/10-knowledge/retro.md</code>, <code>CLAUDE.md</code></dd></dl>
+            <div class="gateline"><strong>Gate</strong> · The team agrees which lessons become standing rules.</div>
+          </div>
+        </div>
+      </article>
+
+      <div class="note"><p><strong>Rolling out gradually:</strong> if a phase plugin isn't installed, the conductor does that phase itself using the built-in "phase contract" table in its skill, and suggests installing the plugin for more consistent results. Only <code>sdlc-core</code> is required.</p></div>
+    </section>
+
+    <!-- 8 -->
+    <section id="artifacts">
+      <h2>Artifacts &amp; traceability</h2>
+      <p class="prose">Every ID points back to the one before it, so you can follow any line of code back to the business need and any production incident back to the requirement it exposed.</p>
+      <div class="trace" aria-label="Traceability chain">
+        <span class="id">US-1<small>user story</small></span><span class="arr">→</span>
+        <span class="id">AC-1.2<small>acceptance criterion</small></span><span class="arr">→</span>
+        <span class="id">ADR-001<small>design decision</small></span><span class="arr">→</span>
+        <span class="id">T-3<small>task</small></span><span class="arr">→</span>
+        <span class="id">TC-04<small>test case</small></span><span class="arr">→</span>
+        <span class="id">PR<small>pull request</small></span><span class="arr">→</span>
+        <span class="id">RCA<small>incident</small></span>
+      </div>
+      <p class="prose">Other ID families: <code>NFR-n</code> non-functional requirements, <code>BR-n</code> business rules, <code>DEF-n</code> defects, and open issues prefixed with the phase (<code>DIS-1</code>, <code>REQ-2</code>, <code>DES-1</code>…).</p>
+      <h3>What a managed project looks like</h3>
+<pre><code>your-project/
+├── .sdlc/state.json             <span class="cmt"># process memory; never edited by hand</span>
+├── CLAUDE.md                    <span class="cmt"># SDLC rules + "Standing rules learned on this project"</span>
+├── docs/
+│   ├── 01-discovery/problem-brief.md
+│   ├── 02-requirements/requirements.md
+│   ├── 03-design/design.md, adr/ADR-001-*.md
+│   ├── 04-planning/tasks.md
+│   ├── 05-build/build-log.md
+│   ├── 06-qa/test-cases.md, test-report.md
+│   ├── 07-review/review-report.md
+│   ├── 08-release/release-plan.md, release-notes.md
+│   ├── 09-operate/monitoring.md, RCA-*.md
+│   └── 10-knowledge/retro.md
+└── src/ tests/ …                <span class="cmt"># locked until Planning is approved</span></code></pre>
+    </section>
+
+    <!-- 9 -->
+    <section id="state">
+      <h2>The state file</h2>
+      <p class="prose"><code>.sdlc/state.json</code> is the process's memory. <code>sdlc_state.py</code> writes it atomically (to a temp file, then <code>os.replace</code>) and appends every change to <code>history</code>. Here is an abbreviated example from partway through a run:</p>
+<pre><code>{
+  "schema_version": 1,
+  "project": "Membership Freeze",
+  "slug": "membership-freeze",
+  "approvers": { "product_owner": "Tito", "tech_lead": "Tito", "qa_lead": "Tito", "team": "Tito" },
+  "settings": {
+    "code_paths": ["src/", "app/", "lib/", "services/", "packages/", "api/", "web/", "tests/", "test/"],
+    "require_tests_on_commit": true,
+    "test_markers": ["test", "spec", "__tests__"]
+  },
+  "current_phase": "requirements",
+  "phases": {
+    "discovery": { "status": "approved", "artifacts": ["docs/01-discovery/problem-brief.md"],
+                   "approved_by": "Tito", "approved_on": "2026-10-01", "open_issues": [] },
+    "requirements": { "status": "in_review", "artifacts": ["docs/02-requirements/requirements.md"],
+                      "approved_by": null, "approved_on": null,
+                      "open_issues": [{ "id": "REQ-1", "text": "Check-in while frozen?",
+                                        "raised": "2026-10-01", "resolved": false }] },
+    "design": { "status": "not_started", … }
+    <span class="cmt">// … planning through knowledge</span>
+  },
+  "history": [
+    { "ts": "…", "event": "project_created", "by": "Tito", "note": "Membership Freeze" },
+    { "ts": "…", "event": "approved", "phase": "discovery", "by": "Tito" },
+    { "ts": "…", "event": "issue_added", "phase": "requirements", "note": "REQ-1: Check-in while frozen?" }
+  ]
+}</code></pre>
+      <p class="prose">Approver names default to the Product Owner given at <code>init</code>. Tech Lead and QA Lead can be set separately with <code>--tech-lead</code> and <code>--qa-lead</code>. The phase definitions themselves (skills, artifacts, gate text, approver role) live in the <code>PHASES</code> list at the top of <code>sdlc_state.py</code>, not in the state file.</p>
+    </section>
+
+    <!-- 10 -->
+    <section id="cli">
+      <h2>State script CLI</h2>
+      <p class="prose">Skills call this script. You can also run it directly to inspect a project. Path: <code>plugins/sdlc-core/scripts/sdlc_state.py</code>.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Command</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td><code>init "&lt;Name&gt;" --approver N [--tech-lead N] [--qa-lead N] [--dir P]</code></td><td>Creates the state file, the <code>docs/</code> phase folders and <code>CLAUDE.md</code>. If a <code>CLAUDE.md</code> already exists, the SDLC section is appended to it.</td></tr>
+          <tr><td><code>status [--json]</code></td><td>Prints a table of phases with markers <code>OK</code> approved, <code>??</code> in review, <code>..</code> draft, <code>!!</code> reopened.</td></tr>
+          <tr><td><code>next [--json]</code></td><td>Returns the phase to work on, with its skills, agents, artifacts, gate, approver, open issues and the action to take.</td></tr>
+          <tr><td><code>set-status &lt;phase&gt; draft|in_review [--artifact P]…</code></td><td>Moves a phase forward. Refuses if the previous phase isn't approved.</td></tr>
+          <tr><td><code>approve &lt;phase&gt; --by N [--note T] [--accept-open-issues]</code></td><td>The human gate. Requires <code>in_review</code> and a name.</td></tr>
+          <tr><td><code>reopen &lt;phase&gt; --reason T [--by N]</code></td><td>Sets the phase to <code>reopened</code> and adds the reason as an open issue.</td></tr>
+          <tr><td><code>issue add &lt;phase&gt; "&lt;question&gt;"</code></td><td>Records a decision only a person can make.</td></tr>
+          <tr><td><code>issue resolve &lt;phase&gt; &lt;ID&gt; --note "&lt;decision&gt;"</code></td><td>Records the decision and timestamps the resolution.</td></tr>
+          <tr><td><code>phases [--json]</code></td><td>Prints the process definition.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 11 -->
+    <section id="install">
+      <h2>Install &amp; use</h2>
+      <div class="two">
+        <div>
+          <h3>1 · Add the marketplace</h3>
+          <div class="copyblock"><pre><code>/plugin marketplace add rpino/agentic-sdlc-marketplace
+/plugin install sdlc-core@agentic-sdlc</code></pre><button type="button" data-copy>Copy</button></div>
+          <p style="font-size:14px;color:var(--muted)">The repo is private, so Claude Code clones it with your git credentials. If that fails on a machine without them, use the full <code>https://github.com/rpino/agentic-sdlc-marketplace.git</code> URL instead.</p>
+        </div>
+        <div>
+          <h3>2 · Install the phase plugins</h3>
+          <div class="copyblock"><pre><code>/plugin install sdlc-discovery@agentic-sdlc
+/plugin install sdlc-requirements@agentic-sdlc
+/plugin install sdlc-design@agentic-sdlc
+/plugin install sdlc-planning@agentic-sdlc
+/plugin install sdlc-build@agentic-sdlc
+/plugin install sdlc-qa@agentic-sdlc
+/plugin install sdlc-review@agentic-sdlc
+/plugin install sdlc-release@agentic-sdlc
+/plugin install sdlc-ops@agentic-sdlc
+/plugin install sdlc-knowledge@agentic-sdlc</code></pre><button type="button" data-copy>Copy</button></div>
+        </div>
+      </div>
+
+      <h3>A typical run</h3>
+<pre><code><span class="cmt"># in your project folder</span>
+/sdlc-core:init "Membership Freeze" Tito
+  → idea-interviewer asks ~7 questions → problem-brief.md → <span style="color:var(--review)">in_review</span>
+/sdlc-core:approve                         → Discovery <span style="color:var(--accent)">approved</span>
+/sdlc-core:next
+  → spec-writer → acceptance-criteria → requirements-reviewer
+  → requirements.md <span style="color:var(--review)">in_review</span>, open issue REQ-1: "check-in while frozen?"
+"Deny check-in, offer early unfreeze"      → REQ-1 resolved
+/sdlc-core:approve                         → Requirements <span style="color:var(--accent)">approved</span>
+/sdlc-core:next                            → design-drafter + design-reviewer …
+/sdlc-core:status                          <span class="cmt"># any time, any session</span></code></pre>
+
+      <h3>Updating the marketplace</h3>
+      <p class="prose">Edit the files in the repo, commit and push, then run <code>/plugin marketplace update agentic-sdlc</code> in Claude Code. To try changes before pushing, add the local folder instead: <code>/plugin marketplace add ./agentic-sdlc-marketplace</code>.</p>
+    </section>
+
+    <!-- 12 -->
+    <section id="extend">
+      <h2>Extending</h2>
+      <div class="prose">
+        <h3>Change the process</h3>
+        <p>The <code>PHASES</code> list in <code>sdlc_state.py</code> is the machine-readable process. <code>docs/process.md</code> is the human-readable version, and the conductor's "phase contract" table is the fallback. Keep all three in sync when you add, remove or reorder a phase.</p>
+        <h3>Add a skill to a phase</h3>
+        <p>Create <code>plugins/&lt;plugin&gt;/skills/&lt;name&gt;/SKILL.md</code> with <code>name</code> and <code>description</code> frontmatter, then add <code>"&lt;plugin&gt;:&lt;name&gt;"</code> to that phase's <code>skills</code> list so the conductor runs it in order. End the skill by handing back to <code>sdlc-core:conductor</code>.</p>
+        <h3>Add a reviewer agent</h3>
+        <p>Add <code>plugins/&lt;plugin&gt;/agents/&lt;name&gt;.md</code> with <code>tools: Read, Grep, Glob</code> so it can only read, and list it under the phase's <code>agents</code>.</p>
+        <h3>Add a new plugin</h3>
+        <p>Create <code>plugins/&lt;name&gt;/.claude-plugin/plugin.json</code> and add an entry to <code>.claude-plugin/marketplace.json</code> with <code>name</code>, <code>source</code> and <code>description</code>. Bump <code>version</code> when you ship changes.</p>
+        <h3>Tune enforcement per project</h3>
+        <p><code>settings.code_paths</code>, <code>settings.test_markers</code> and <code>settings.require_tests_on_commit</code> live in each project's state file. Because the hook blocks direct edits, change them through the script, or extend the script with a <code>settings</code> command.</p>
+      </div>
+      <h3>Roadmap</h3>
+      <ul class="prose">
+        <li>Connectors (<code>.mcp.json</code>) for Jira and GitHub in Planning, Build and Review</li>
+        <li>Evals for each skill</li>
+        <li>Configurable phase sets, such as a "lite" path for small changes</li>
+      </ul>
+    </section>
+
+    <!-- 13 -->
+    <section id="limits">
+      <h2>Known limitations</h2>
+      <div class="note warn prose"><p>These are behaviours of version 0.1.0 worth knowing before you depend on the gates.</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Area</th><th>Behaviour</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>Python launcher</td><td>Hooks and skills call <code>python3</code>.</td><td>On Windows, <code>python3</code> is sometimes only the Microsoft Store stub, and the hooks fail if it is. Check with <code>python3 --version</code>.</td></tr>
+          <tr><td>Test detection</td><td>A file counts as a test if its path contains <code>test</code>, <code>spec</code> or <code>__tests__</code> anywhere.</td><td><code>src/contest.ts</code> or <code>specials.py</code> would satisfy the test-with-commit rule.</td></tr>
+          <tr><td>Shell guard</td><td>Shell writes to the state file are caught with a regex for common write commands.</td><td>Fine for keeping a well-behaved agent on track, but not a security boundary.</td></tr>
+          <tr><td>Code-path match</td><td>Paths are matched by prefix from the project root.</td><td>Code outside the listed folders, such as root-level scripts or <code>cmd/</code>, isn't gated until you add it to <code>code_paths</code>.</td></tr>
+          <tr><td>Approver identity</td><td>Approval records whatever name is passed to <code>--by</code>.</td><td>It's an audit trail, not authentication. Anyone at the keyboard can type the command.</td></tr>
+          <tr><td>Settings</td><td>There's no CLI command to change <code>settings</code>.</td><td>Tuning enforcement for a project currently means extending the script.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <footer>Agentic SDLC Marketplace · owner Tito · MIT license · written from the source of version 0.1.0</footer>
+  </main>
+</div>
+
+<script>
+document.querySelectorAll('[data-copy]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var code = btn.parentElement.querySelector('code');
+    var text = code.innerText;
+    var done = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1600); };
+    var fallback = function () {
+      var r = document.createRange(); r.selectNodeContents(code);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      btn.textContent = 'Selected';
+      setTimeout(function () { btn.textContent = 'Copy'; }, 1600);
+    };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  });
+});
+</script>
+</body>
+</html>

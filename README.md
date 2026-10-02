@@ -18,6 +18,8 @@ You don't call skills one by one. You use **four commands**, and the conductor r
 
 The conductor can also reopen an earlier phase (`/sdlc-core:reopen`) when a later one finds a gap.
 
+**Full documentation:** [docs/guide.html](docs/guide.html) is an illustrated reference covering the phases, the state machine, hooks, every phase plugin, artifacts, the CLI and how to extend the marketplace. Open it in a browser after cloning.
+
 ---
 
 ## Install
@@ -25,7 +27,7 @@ The conductor can also reopen an earlier phase (`/sdlc-core:reopen`) when a late
 From Claude Code:
 
 ```
-/plugin marketplace add <github-owner>/<repo>
+/plugin marketplace add rpino/agentic-sdlc-marketplace
 /plugin install sdlc-core@agentic-sdlc
 ```
 
@@ -127,7 +129,7 @@ Every skill can also be used on its own outside a managed project (e.g. `/sdlc-r
 /sdlc-core:status                       → any time, any session
 ```
 
-See [docs/process.md](docs/process.md) for the full process definition.
+See [docs/process.md](docs/process.md) for the full process definition and [docs/guide.html](docs/guide.html) for the complete reference guide.
 
 ## Repository layout
 
