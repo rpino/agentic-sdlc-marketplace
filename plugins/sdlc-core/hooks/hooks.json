@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/sdlc_session.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/run_py.sh\" \"${CLAUDE_PLUGIN_ROOT}/scripts/sdlc_session.py\"",
             "timeout": 10
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/sdlc_gate.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/run_py.sh\" \"${CLAUDE_PLUGIN_ROOT}/scripts/sdlc_gate.py\"",
             "timeout": 15
           }
         ]

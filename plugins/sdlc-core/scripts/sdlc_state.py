@@ -460,6 +460,39 @@ def cmd_issue(args):
     save(root, state)
 
 
+def cmd_settings(args):
+    root, state = load()
+    settings = state.setdefault("settings", json.loads(json.dumps(DEFAULT_SETTINGS)))
+    if args.action == "show":
+        print(json.dumps(settings, indent=2))
+        return
+    if args.action in ("add-code-path", "remove-code-path"):
+        if not args.value:
+            die(f"settings {args.action} needs a path, e.g. tictactoe/")
+        path = args.value.replace("\\", "/").removeprefix("./")
+        path = path if path.endswith("/") else path + "/"
+        paths = settings.setdefault("code_paths", [])
+        if args.action == "add-code-path":
+            if path in paths:
+                print(f"'{path}' is already a gated code path.")
+                return
+            paths.append(path)
+        else:
+            if path not in paths:
+                die(f"'{path}' is not a gated code path. Current: {', '.join(paths)}")
+            paths.remove(path)
+        note = f"{args.action} {path}"
+    else:  # require-tests
+        if args.value not in ("on", "off"):
+            die("settings require-tests needs 'on' or 'off'")
+        settings["require_tests_on_commit"] = args.value == "on"
+        note = f"require_tests_on_commit={args.value}"
+    log(state, "settings_changed", by=args.by, note=note)
+    save(root, state)
+    print(f"Settings updated: {note}")
+    print(f"Gated code paths: {', '.join(settings.get('code_paths', []))}")
+
+
 def cmd_phases(args):
     if args.json:
         print(json.dumps(PHASES, indent=2))
@@ -513,6 +546,12 @@ def main():
     s.add_argument("text", help="issue text (add) or issue id (resolve)")
     s.add_argument("--note")
     s.set_defaults(fn=cmd_issue)
+
+    s = sub.add_parser("settings", help="show or change gate settings (code paths, test-on-commit rule)")
+    s.add_argument("action", choices=["show", "add-code-path", "remove-code-path", "require-tests"])
+    s.add_argument("value", nargs="?", help="path for *-code-path; on|off for require-tests")
+    s.add_argument("--by")
+    s.set_defaults(fn=cmd_settings)
 
     s = sub.add_parser("phases")
     s.add_argument("--json", action="store_true")

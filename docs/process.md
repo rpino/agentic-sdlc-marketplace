@@ -59,6 +59,7 @@ python3 …/sdlc_state.py approve <phase> --by NAME [--note TEXT] [--accept-open
 python3 …/sdlc_state.py reopen <phase> --reason TEXT [--by NAME]
 python3 …/sdlc_state.py issue add <phase> "<question>"
 python3 …/sdlc_state.py issue resolve <phase> <ISSUE-ID> --note "<decision>"
+python3 …/sdlc_state.py settings show | add-code-path PATH | remove-code-path PATH | require-tests on|off [--by NAME]
 python3 …/sdlc_state.py phases
 ```
 

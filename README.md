@@ -48,7 +48,7 @@ Then install the phase plugins you want (all recommended):
 
 To test locally before pushing: `claude plugin marketplace add ./agentic-sdlc-marketplace`.
 
-**Requirement:** `python3` on your PATH. The state manager and hooks use only the Python standard library.
+**Requirement:** Python 3 (standard library only). The hooks start it through `scripts/run_py.sh`, which tries `python3`, then `python`, then the Windows `py` launcher, and skips the Microsoft Store stub. The skills call `python3` in their examples; on Windows without a `python3` command, use `python` or `py -3` instead.
 
 ---
 
@@ -70,7 +70,7 @@ The `sdlc-core:conductor` skill reads the state, runs the current phase's skills
 | `PreToolUse` (Write/Edit) | Blocks writing code under `src/ app/ lib/ services/ packages/ api/ web/ tests/ test/` until **Planning is approved** |
 | `PreToolUse` (Bash) | Blocks `git commit` of code changes that include no test changes |
 
-You can adjust the code paths and the test rule in the `settings` block of `.sdlc/state.json` (through the script, not by hand).
+You can adjust the code paths and the test rule with the `settings` command, never by editing the file by hand. For example, `sdlc_state.py settings add-code-path tictactoe/` gates a non-standard source folder, `settings require-tests off` turns off the test-on-commit rule, and `settings show` lists the current values.
 
 ### 4. Artifacts: the handoff chain
 Each phase's output is the next phase's input, and IDs trace all the way through (US-1 → AC-1.2 → T-3 → TC-04 → PR → RCA).
