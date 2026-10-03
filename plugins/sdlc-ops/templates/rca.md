@@ -22,6 +22,11 @@
 4. Why?
 5. Why?
 
+## Detection
+- How was it detected (SLO burn alert / customer / staff)?
+- Time to detect:
+- Error budget consumed:
+
 ## Why our process didn't catch it
 | Phase | What was missing |
 |---|---|

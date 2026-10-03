@@ -641,8 +641,8 @@ def trace(root, feat):
             if not ac_tcs[a]:
                 add("ac_without_tc", a, f"{a} has no test case")
             elif not any(results.get(t) == "PASS" for t in ac_tcs[a]):
-                add("ac_unverified", a, f"{a} has no passing test case "
-                    f"({', '.join(f'{t}={results.get(t, 'not run')}' for t in ac_tcs[a])})")
+                got = ", ".join(t + "=" + results.get(t, "not run") for t in ac_tcs[a])
+                add("ac_unverified", a, f"{a} has no passing test case ({got})")
         for t in sorted(tc_acs, key=_num_key):
             if results.get(t) == "FAIL":
                 add("tc_failing", t, f"{t} is failing")

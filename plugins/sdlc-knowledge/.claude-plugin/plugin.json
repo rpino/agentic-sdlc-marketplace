@@ -1,7 +1,7 @@
 {
   "name": "sdlc-knowledge",
   "displayName": "SDLC 10 · Knowledge",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Phase 10 of the Agentic SDLC: captures retrospectives and delivery metrics, and turns agreed lessons into standing rules in CLAUDE.md so every future agent follows them.",
   "author": { "name": "Tito", "email": "pino.islas@gmail.com" },
   "license": "MIT",

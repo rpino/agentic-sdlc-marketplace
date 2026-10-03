@@ -9,7 +9,7 @@
     {
       "name": "sdlc-core",
       "source": "./plugins/sdlc-core",
-      "description": "Backbone of the Agentic SDLC: a conductor that routes work through 10 phases, a state file that remembers where every project stands, human approval gates, and hooks that stop phases being skipped."
+      "description": "Backbone of the Agentic SDLC: a conductor that routes work through 10 phases and work-type lanes, a state file for several features at once, human-only approval gates with stale-approval detection, traceability and exit checks, DORA metrics, and hooks that stop phases being skipped."
     },
     {
       "name": "sdlc-discovery",
@@ -60,6 +60,11 @@
       "name": "sdlc-knowledge",
       "source": "./plugins/sdlc-knowledge",
       "description": "Phase 10 of the Agentic SDLC: captures retrospectives and delivery metrics, and turns agreed lessons into standing rules in CLAUDE.md so every future agent follows them."
+    },
+    {
+      "name": "sdlc-connectors",
+      "source": "./plugins/sdlc-connectors",
+      "description": "Optional MCP connectors for the Agentic SDLC: GitHub (PRs, reviews, checks) for build and review, and Jira or Linear (tickets) for planning."
     }
   ]
 }

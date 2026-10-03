@@ -1,7 +1,7 @@
 {
   "name": "sdlc-ops",
   "displayName": "SDLC 9 · Operate",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Phase 9 of the Agentic SDLC: post-release monitoring summaries and incident root-cause analyses that feed follow-up acceptance criteria back into requirements.",
   "author": { "name": "Tito", "email": "pino.islas@gmail.com" },
   "license": "MIT",

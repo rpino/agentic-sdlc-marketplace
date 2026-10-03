@@ -1,9 +1,10 @@
 import json
 import os
 import subprocess
+import sys
 import unittest
 
-from helpers import PROMPT, SESSION, ProjectCase, walk_to
+from helpers import GATE, PROMPT, SESSION, ProjectCase, walk_to
 
 
 class OutsideProject(ProjectCase):
@@ -12,9 +13,7 @@ class OutsideProject(ProjectCase):
         self.assertAllowed(self.gate("Bash", command="echo hi > src/a.py"))
 
     def test_garbage_payload_is_allowed(self):
-        p = subprocess.run(["python", os.path.join(os.path.dirname(__file__), "..", "plugins",
-                                                   "sdlc-core", "scripts", "sdlc_gate.py")],
-                           input="not json", capture_output=True, text=True)
+        p = subprocess.run([sys.executable, GATE], input="not json", capture_output=True, text=True)
         self.assertEqual(p.returncode, 0)
 
 

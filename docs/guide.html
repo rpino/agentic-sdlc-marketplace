@@ -199,21 +199,21 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
   <main>
     <!-- 1 -->
     <section id="overview">
-      <div class="eyebrow">Claude Code plugin marketplace · v0.1.0</div>
+      <div class="eyebrow">Claude Code plugin marketplace · v0.2.0</div>
       <h1>Agentic SDLC Marketplace</h1>
-      <p class="lede">A conductor plus ten phase plugins that take a feature from idea to deployment. Agents draft every phase. A named person approves each one before the next phase can start.</p>
+      <p class="lede">A conductor plus ten phase plugins that take work from idea to deployment. Agents draft every phase, independent reviewer agents check it, and a named person approves each one before the next phase can start.</p>
       <div class="meta">
         <span>Marketplace name <code>agentic-sdlc</code></span>
         <span>Repo <code>rpino/agentic-sdlc-marketplace</code></span>
-        <span>11 plugins · 20 skills · 2 agents · 2 hooks</span>
-        <span>Requires <code>python3</code> (stdlib only)</span>
+        <span>12 plugins · 21 skills · 5 agents · 3 hooks</span>
+        <span>Requires Python 3.9+ (stdlib only)</span>
         <span>MIT</span>
       </div>
 
       <div class="prose">
         <h2>What it does</h2>
-        <p>Claude Code is good at writing code, but on its own it will happily skip straight from a vague idea to an implementation. This marketplace puts a delivery process around it. Every feature passes through Discovery, Requirements, Design, Planning, Build, QA, Review, Release, Operate and Knowledge, in that order. Each phase produces a markdown artifact in <code>docs/</code>, and that artifact is the input to the next phase.</p>
-        <p>You drive the whole thing with four commands. The conductor works out which phase is current, runs that phase's skills, records questions that need a human answer, and then stops and waits for approval. Python hooks enforce the rules the prompts ask for, so an agent can't write production code before the plan is approved or edit the state file to approve itself.</p>
+        <p>Claude Code is good at writing code, but on its own it will happily skip straight from a vague idea to an implementation. This marketplace puts a delivery process around it. A feature passes through Discovery, Requirements, Design, Planning, Build, QA, Review, Release, Operate and Knowledge, in that order. Smaller work types (bugfix, hotfix, spike, chore) follow a shorter lane. Each phase produces a markdown artifact, and that artifact is the input to the next phase.</p>
+        <p>You drive the whole thing with a handful of commands. The conductor works out which phase is current, runs that phase's skills, has independent agents review the result, records questions that need a human answer, and then stops and waits for approval. Python hooks and the state script enforce the rules the prompts ask for. An agent can't write production code before the plan is approved, approve its own work, weaken a gate, or deploy to production. Traceability gaps and stale approvals are caught by code, not by hope.</p>
       </div>
 
       <h3>Principles</h3>
@@ -221,7 +221,9 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
         <div><b>AI drafts, humans decide</b><span>Every phase ends at a gate approved by a named person. The agent never approves.</span></div>
         <div><b>Artifacts are the contract</b><span>Each phase's output document is the next phase's input.</span></div>
         <div><b>Traceability end to end</b><span>US → AC → design → task → test → PR → release → RCA.</span></div>
-        <div><b>Feedback loops are normal</b><span>A later phase that finds a gap reopens the earlier phase instead of patching around it.</span></div>
+        <div><b>Maker ≠ checker</b><span>Reviews come from read-only reviewer agents with a fresh context, then a human.</span></div>
+        <div><b>Feedback loops are normal</b><span>A later phase that finds a gap reopens the earlier phase, and work built on it is re-validated.</span></div>
+        <div><b>Small batches</b><span>Small tasks, small commits and feature flags make every gate fast and every change easy to roll back.</span></div>
         <div><b>Lessons compound</b><span>Adopted retro lessons become standing rules in <code>CLAUDE.md</code> that every future agent follows.</span></div>
       </div>
     </section>
@@ -244,7 +246,20 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
           <a class="stop" role="listitem" href="#ph-knowledge"><span class="n">10</span><span class="t">Knowledge</span><span class="gate">GATE</span><span class="who">Team</span></a>
         </div>
       </div>
-      <p class="prose" style="font-size:14px;color:var(--muted)">Code paths unlock only after the Planning gate (phase 4) is approved. That is the hook-enforced line between thinking and building.</p>
+      <p class="prose" style="font-size:14px;color:var(--muted)">For a feature, code paths unlock only after the Planning gate (phase 4) is approved. That is the hook-enforced line between thinking and building.</p>
+
+      <h3>Work types (lanes)</h3>
+      <p class="prose">A project can hold several features at once, each with its own documents (<code>docs/</code> for the first, <code>docs/features/&lt;slug&gt;/</code> after that). Each feature follows the lane for its type. Code unlocks once every phase before Build in the lane is approved.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Type</th><th>Phases</th><th>Use for</th></tr></thead>
+        <tbody>
+          <tr><td><code>feature</code></td><td>all 10</td><td>New capability</td></tr>
+          <tr><td><code>bugfix</code></td><td>requirements → build → qa → review → release</td><td>A defect: expected behaviour as ACs, then the fix</td></tr>
+          <tr><td><code>hotfix</code></td><td>build → review → release → operate → knowledge</td><td>Production emergency: code unlocked at once, but review, RCA and retro still required</td></tr>
+          <tr><td><code>spike</code></td><td>discovery → design</td><td>Time-boxed investigation ending in an ADR. Never unlocks code</td></tr>
+          <tr><td><code>chore</code></td><td>planning → build → review</td><td>Dependency bumps, refactors, maintenance</td></tr>
+        </tbody>
+      </table></div>
     </section>
 
     <!-- 3 -->
@@ -253,31 +268,38 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
       <p class="prose">One catalog file lists every plugin. Each plugin is a folder with a manifest, skills, optional reviewer agents, and the templates its skills fill in. Only <code>sdlc-core</code> contains executable code.</p>
 <pre><code>agentic-sdlc-marketplace/
 ├── .claude-plugin/
-│   └── marketplace.json        <span class="cmt"># the catalog: name "agentic-sdlc", 11 plugin entries</span>
+│   └── marketplace.json        <span class="cmt"># the catalog: name "agentic-sdlc", 12 plugin entries</span>
+├── .github/workflows/ci.yml    <span class="cmt"># tests (3 OSes), consistency check, strict validation, evals on demand</span>
 ├── docs/process.md             <span class="cmt"># human-readable process definition</span>
+├── tests/                      <span class="cmt"># unittest suite for the state machine and every hook</span>
+├── tools/check_consistency.py  <span class="cmt"># PHASES ↔ plugins ↔ process.md ↔ README</span>
 ├── README.md · LICENSE · .gitignore
 └── plugins/
     ├── sdlc-core/              <span class="cmt"># the backbone</span>
     │   ├── .claude-plugin/plugin.json
-    │   ├── hooks/hooks.json    <span class="cmt"># SessionStart + PreToolUse</span>
+    │   ├── hooks/hooks.json    <span class="cmt"># SessionStart + UserPromptSubmit + PreToolUse</span>
     │   ├── scripts/
-    │   │   ├── sdlc_state.py   <span class="cmt"># state machine, single source of truth (~530 lines)</span>
+    │   │   ├── sdlc_state.py   <span class="cmt"># state machine, trace, metrics: single source of truth</span>
     │   │   ├── sdlc_gate.py    <span class="cmt"># PreToolUse enforcement</span>
-    │   │   └── sdlc_session.py <span class="cmt"># SessionStart context injection</span>
+    │   │   ├── sdlc_prompt.py  <span class="cmt"># UserPromptSubmit: human-intent tokens</span>
+    │   │   ├── sdlc_session.py <span class="cmt"># SessionStart context injection</span>
+    │   │   └── run_py.sh       <span class="cmt"># portable Python launcher</span>
     │   ├── skills/
     │   │   ├── conductor/      <span class="cmt"># the orchestrator (model-invoked)</span>
-    │   │   ├── init/ next/ approve/ status/ reopen/
+    │   │   ├── init/ next/ approve/ status/ reopen/ settings/
+    │   ├── evals/              <span class="cmt"># behaviour evals (claude plugin eval)</span>
     │   └── templates/project-CLAUDE.md
     ├── sdlc-discovery/         <span class="cmt"># skills/idea-interviewer, templates/problem-brief.md</span>
     ├── sdlc-requirements/      <span class="cmt"># skills/spec-writer, acceptance-criteria; agents/requirements-reviewer</span>
     ├── sdlc-design/            <span class="cmt"># skills/design-drafter; agents/design-reviewer; templates/design.md, adr.md</span>
     ├── sdlc-planning/          <span class="cmt"># skills/task-breakdown</span>
     ├── sdlc-build/             <span class="cmt"># skills/task-executor</span>
-    ├── sdlc-qa/                <span class="cmt"># skills/qa-from-acceptance-criteria</span>
-    ├── sdlc-review/            <span class="cmt"># skills/pr-reviewer, security-checklist</span>
+    ├── sdlc-qa/                <span class="cmt"># skills/qa-from-acceptance-criteria; agents/test-auditor</span>
+    ├── sdlc-review/            <span class="cmt"># skills/pr-reviewer, security-checklist; agents/code-reviewer, security-reviewer</span>
     ├── sdlc-release/           <span class="cmt"># skills/release-notes, pipeline-fixer</span>
     ├── sdlc-ops/               <span class="cmt"># skills/incident-summarizer</span>
-    └── sdlc-knowledge/         <span class="cmt"># skills/retro-capture, knowledge-updater</span></code></pre>
+    ├── sdlc-knowledge/         <span class="cmt"># skills/retro-capture, knowledge-updater</span>
+    └── sdlc-connectors/        <span class="cmt"># optional .mcp.json: GitHub, Linear, Atlassian</span></code></pre>
 
       <h3>How Claude Code reads it</h3>
       <div class="table-wrap"><table>
@@ -285,8 +307,10 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
         <tbody>
           <tr><td><code>.claude-plugin/marketplace.json</code></td><td>Catalog. <code>/plugin marketplace add</code> reads it to learn the marketplace name, the owner, and where each plugin's <code>source</code> folder is.</td></tr>
           <tr><td><code>plugins/*/.claude-plugin/plugin.json</code></td><td>Plugin manifest: name, display name, version, author, license, keywords.</td></tr>
-          <tr><td><code>skills/&lt;name&gt;/SKILL.md</code></td><td>A skill. Frontmatter <code>name</code> and <code>description</code> decide when Claude uses it. It is invoked as <code>/&lt;plugin&gt;:&lt;skill&gt;</code>. Skills with <code>disable-model-invocation: true</code> (init, next, approve) only run when a person types the command.</td></tr>
-          <tr><td><code>agents/*.md</code></td><td>Subagents with a restricted toolset (<code>Read, Grep, Glob</code>). The reviewers can read the draft but cannot change it.</td></tr>
+          <tr><td><code>skills/&lt;name&gt;/SKILL.md</code></td><td>A skill. Frontmatter <code>name</code> and <code>description</code> decide when Claude uses it. It is invoked as <code>/&lt;plugin&gt;:&lt;skill&gt;</code>. Skills with <code>disable-model-invocation: true</code> (init, next, approve, settings) only run when a person types the command.</td></tr>
+          <tr><td><code>agents/*.md</code></td><td>Independent reviewer subagents with a restricted toolset (<code>Read, Grep, Glob</code>, plus <code>Bash</code> for read-only git, tests and scanners). They review with a fresh context and never edit.</td></tr>
+          <tr><td><code>.mcp.json</code></td><td>MCP servers a plugin brings with it (only <code>sdlc-connectors</code>).</td></tr>
+          <tr><td><code>evals/&lt;case&gt;/</code></td><td>Behaviour evals: a <code>prompt.md</code> plus <code>graders/*.md</code>, run with <code>claude plugin eval</code>.</td></tr>
           <tr><td><code>hooks/hooks.json</code></td><td>Registers the Python hooks. <code>${CLAUDE_PLUGIN_ROOT}</code> resolves to the installed plugin's folder.</td></tr>
           <tr><td><code>templates/*.md</code></td><td>Skeletons that skills fill in, referenced as <code>${CLAUDE_PLUGIN_ROOT}/templates/…</code>.</td></tr>
         </tbody>
@@ -302,10 +326,11 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
       <div class="table-wrap"><table>
         <thead><tr><th>Command</th><th>Who runs it</th><th>What it does</th></tr></thead>
         <tbody>
-          <tr><td><code>/sdlc-core:init "Name" [approver]</code></td><td>Person only</td><td>Creates <code>.sdlc/state.json</code>, the <code>docs/01…10</code> folders and a project <code>CLAUDE.md</code>, then starts Discovery right away.</td></tr>
+          <tr><td><code>/sdlc-core:init "Name" [approver] [--type …]</code></td><td>Person only</td><td>Creates <code>.sdlc/state.json</code>, the phase folders for the lane and a project <code>CLAUDE.md</code>, then starts the first phase right away. In an existing project it adds a new feature instead.</td></tr>
           <tr><td><code>/sdlc-core:next [notes]</code></td><td>Person only</td><td>Runs the next step of the current phase. If the phase is <span class="chip review">in_review</span> and you add notes, they count as review feedback: the phase goes back to <span class="chip draft">draft</span>, gets revised, and is resubmitted.</td></tr>
-          <tr><td><code>/sdlc-core:approve [phase] [--note]</code></td><td>Person only</td><td><strong>The human gate.</strong> Shows an approval summary, confirms who is approving, records the approval, and names the next phase. It does not start that phase.</td></tr>
-          <tr><td><code>/sdlc-core:status</code></td><td>Anyone</td><td>Shows every phase's status, who approved what, open issues, and who needs to act next.</td></tr>
+          <tr><td><code>/sdlc-core:approve [phase] [--note]</code></td><td>Person only</td><td><strong>The human gate.</strong> Typing it issues a one-time token. The skill shows an approval summary (including the trace and PR review state), confirms who is approving, records the approval with artifact hashes, and names the next phase. It does not start that phase.</td></tr>
+          <tr><td><code>/sdlc-core:status</code></td><td>Anyone</td><td>Shows every phase's status, who approved what, stale approvals, open issues, the code-lock state, and who needs to act next.</td></tr>
+          <tr><td><code>/sdlc-core:settings …</code></td><td>Person only</td><td>Changes gate settings. Changes that weaken a gate need the token that typing the command issues.</td></tr>
           <tr><td><code>/sdlc-core:reopen &lt;phase&gt; "reason"</code></td><td>Person or agent</td><td>Sends work back to an earlier phase when a later one finds a gap, and records the gap as an open issue.</td></tr>
         </tbody>
       </table></div>
@@ -313,21 +338,21 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
       <h3>The conductor loop</h3>
       <p class="prose">The <code>sdlc-core:conductor</code> skill orchestrates. It doesn't do the phase work itself. It reads the state, routes to the right skills, and stops at the gate. <code>next</code> and <code>init</code> both hand off to it.</p>
       <ol class="steps prose">
-        <li><span><strong>Read state.</strong> Run <code>sdlc_state.py next --json</code>, which returns the phase, its status, its skills and agents, the expected artifacts, the gate, the approver and any open issues.</span></li>
-        <li><span><strong>Branch on status.</strong> <span class="chip review">in_review</span>: stop and name the approver. <span class="chip reopen">reopened</span>: ask for the missing decisions and resolve the issues. <span class="chip">not_started</span> or <span class="chip draft">draft</span>: continue.</span></li>
+        <li><span><strong>Read state.</strong> Run <code>sdlc_state.py next --json</code>, which returns the active feature, the phase, its status, its skills and reviewer agents, the input artifacts, the expected artifact paths for this feature, the gate, the approver and any open issues.</span></li>
+        <li><span><strong>Branch on status.</strong> <span class="chip review">in_review</span>: stop and name the approver. <span class="chip reopen">reopened</span>: ask for the missing decisions and resolve the issues. <span class="chip reopen">needs_revalidation</span>: re-check the artifact against the changed inputs. <span class="chip">not_started</span> or <span class="chip draft">draft</span>: continue.</span></li>
         <li><span><strong>Mark in progress:</strong> <code>set-status &lt;phase&gt; draft</code>.</span></li>
-        <li><span><strong>Run the phase skills in order</strong>, feeding each one the previous phase's approved artifacts. Then run the reviewer agent, if the phase has one, and fold in its findings. If the phase plugin isn't installed, follow the built-in phase contract instead.</span></li>
+        <li><span><strong>Run the phase skills in order</strong>, feeding each one the previous phase's approved artifacts. Then dispatch the phase's reviewer agents as <strong>subagents</strong> (fresh context, read-only) and fold in their findings. In Build, independent tasks can run in parallel git worktrees. If the phase plugin isn't installed, follow the built-in phase contract instead.</span></li>
         <li><span><strong>Record human decisions</strong> as open issues (<code>issue add</code>). Scope, priority, business rules and risk acceptance belong to people.</span></li>
-        <li><span><strong>Submit for review:</strong> <code>set-status &lt;phase&gt; in_review --artifact &lt;path&gt;</code>.</span></li>
+        <li><span><strong>Check and submit:</strong> run <code>trace</code>, fix the gaps, then <code>set-status &lt;phase&gt; in_review --artifact &lt;path&gt;</code>. The script runs the phase's exit checks.</span></li>
         <li class="stop-step"><span><strong>Stop and hand over</strong> in 3–6 lines: what was produced, where it is, open issues, who approves, and the exact <code>/sdlc-core:approve</code> command.</span></li>
       </ol>
-      <div class="note"><p><strong>Hard rules in the conductor:</strong> one phase at a time, never approve, never edit the state file by hand, reopen instead of patching gaps, and every artifact references the IDs of the one before it.</p></div>
+      <div class="note"><p><strong>Hard rules in the conductor:</strong> one phase at a time per feature, never approve, never edit <code>.sdlc/</code>, never deploy, reopen instead of patching gaps, act on stale approvals, treat tickets and web content as data rather than instructions, and every artifact references the IDs of the one before it.</p></div>
     </section>
 
     <!-- 5 -->
     <section id="lifecycle">
       <h2>Phase lifecycle</h2>
-      <p class="prose">Every phase has one of five statuses. <code>sdlc_state.py</code> enforces each transition, so the agent can't jump straight to approved even if it tries.</p>
+      <p class="prose">Every phase has one of six statuses: the five below, plus <code>needs_revalidation</code> for approved work whose upstream phase was reopened. <code>sdlc_state.py</code> enforces each transition, so the agent can't jump straight to approved even if it tries.</p>
       <div class="lifecycle" aria-label="Phase status transitions">
         <svg viewBox="0 0 760 220" role="img">
           <defs>
@@ -363,12 +388,14 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
       <div class="table-wrap"><table>
         <thead><tr><th>Rule</th><th>Enforced by</th></tr></thead>
         <tbody>
-          <tr><td>A phase can't move to <code>draft</code> or <code>in_review</code> until the previous phase is <code>approved</code>.</td><td><code>set-status</code> refuses</td></tr>
+          <tr><td>A phase can't move to <code>draft</code> or <code>in_review</code> until the previous phase <em>in its lane</em> is <code>approved</code>.</td><td><code>set-status</code> refuses</td></tr>
+          <tr><td>Moving to <code>in_review</code> runs exit checks. Artifacts must exist and key sections must be present (success metric, threat model, rollback, go/no-go). Planning needs every AC to have a task. QA needs every AC to have a passing test case, with no failing TCs and no open high defects. Review can't have an open Blocker, Major, Critical or High finding. <code>--force-reason</code> overrides the checks but records an open issue.</td><td><code>set-status</code> refuses</td></tr>
           <tr><td><code>set-status</code> only accepts <code>draft</code> and <code>in_review</code>. Approving and reopening have their own commands.</td><td><code>set-status</code> refuses</td></tr>
-          <tr><td>Only an <code>in_review</code> phase can be approved, and only with a non-empty <code>--by NAME</code>.</td><td><code>approve</code> refuses</td></tr>
+          <tr><td>Only an <code>in_review</code> phase can be approved, only with a non-empty <code>--by NAME</code>, and only with proof of human intent: a fresh token from the user typing <code>/sdlc-core:approve</code>, or an interactive terminal confirmation.</td><td><code>approve</code> refuses</td></tr>
+          <tr><td>Approval stores a SHA-256 of each artifact. If an artifact is edited afterwards, the phase shows as <code>approved (STALE)</code>.</td><td><code>status</code>, <code>verify</code></td></tr>
           <tr><td>Open issues block approval unless the approver passes <code>--accept-open-issues</code>.</td><td><code>approve</code> refuses</td></tr>
-          <tr><td>The current phase is always the earliest phase that isn't approved, so a reopened phase is automatically next. Downstream phases keep their status.</td><td><code>next_phase()</code></td></tr>
-          <tr><td>Only a person moves a phase to approved.</td><td>The conductor skill and <code>disable-model-invocation</code> on <code>approve</code></td></tr>
+          <tr><td>The current phase is always the earliest phase in the lane that isn't approved, so a reopened phase is automatically next. Later phases that were approved or in review become <code>needs_revalidation</code>, and their previous approvals are kept for the audit trail.</td><td><code>reopen</code>, <code>next_phase()</code></td></tr>
+          <tr><td>Only a person moves a phase to approved.</td><td>The approval token, the gate hook, the conductor skill, and <code>disable-model-invocation</code> on <code>approve</code></td></tr>
         </tbody>
       </table></div>
     </section>
@@ -376,14 +403,18 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
     <!-- 6 -->
     <section id="hooks">
       <h2>Hooks &amp; gates</h2>
-      <p class="prose">Prompts ask the agent to follow the rules. Hooks make sure it does. Both hooks run only inside a project that has a <code>.sdlc/state.json</code>, found by walking up from the working directory. Everywhere else they do nothing.</p>
+      <p class="prose">Prompts ask the agent to follow the rules. Hooks make sure it does. The hooks run only inside a project that has a <code>.sdlc/state.json</code>, found by walking up from the working directory. Everywhere else they do nothing.</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Event</th><th>Script</th><th>Rule</th></tr></thead>
         <tbody>
-          <tr><td><code>SessionStart</code><br><span style="font-size:12px;color:var(--muted)">startup · resume · clear · compact</span></td><td><code>sdlc_session.py</code></td><td>Adds the project name, current phase and status, and any open issues to Claude's context, along with an instruction to follow the conductor. Any session on any day knows where the project stands.</td></tr>
-          <tr><td rowspan="3"><code>PreToolUse</code><br><span style="font-size:12px;color:var(--muted)">Write · Edit · MultiEdit · NotebookEdit · Bash</span></td><td rowspan="3"><code>sdlc_gate.py</code></td><td><strong>State file is script-only.</strong> Denies Write/Edit on <code>.sdlc/state.json</code>, and Bash commands that mention it with <code>&gt;</code>, <code>tee</code>, <code>sed -i</code>, <code>mv</code>, <code>cp</code>, <code>rm</code> or <code>python -c</code> unless they go through <code>sdlc_state.py</code>.</td></tr>
-          <tr><td><strong>No code before a plan.</strong> Denies writes under <code>settings.code_paths</code> until <code>planning</code> is <code>approved</code>.<br><span style="font-size:13px;color:var(--muted)">Default paths: <code>src/ app/ lib/ services/ packages/ api/ web/ tests/ test/</code></span></td></tr>
-          <tr><td><strong>Tests with every commit.</strong> On <code>git commit</code>, reads the staged files (plus unstaged files for <code>-a</code>) and denies the commit if code changed but no test file did.</td></tr>
+          <tr><td><code>SessionStart</code><br><span style="font-size:12px;color:var(--muted)">startup · resume · clear · compact</span></td><td><code>sdlc_session.py</code></td><td>Adds the active feature and its lane, the current phase and status, the code-lock state, open issues and stale approvals to Claude's context, along with an instruction to follow the conductor. Any session on any day knows where the project stands.</td></tr>
+          <tr><td><code>UserPromptSubmit</code></td><td><code>sdlc_prompt.py</code></td><td><strong>Human intent.</strong> When the user types <code>/sdlc-core:approve</code> or <code>/sdlc-core:settings</code>, writes a one-time token to <code>.sdlc/approval-token.json</code>. The token expires in 30 minutes and is used up by the first approval or settings change. The model can't submit user prompts, so it can't create one.</td></tr>
+          <tr><td rowspan="6"><code>PreToolUse</code><br><span style="font-size:12px;color:var(--muted)">Write · Edit · MultiEdit · NotebookEdit · Bash · PowerShell</span></td><td rowspan="6"><code>sdlc_gate.py</code></td><td><strong><code>.sdlc/</code> is script-only.</strong> Denies edit-tool writes anywhere under <code>.sdlc/</code>. It also denies shell and PowerShell writes there: redirects, <code>tee</code>, <code>sed -i</code>, <code>cp</code>/<code>mv</code> destinations, <code>rm</code>, <code>Set-Content</code>, and inline <code>python -c</code>/<code>node -e</code> scripts. Each segment of a compound command is checked separately.</td></tr>
+          <tr><td><strong>No self-approval.</strong> Denies an agent-run <code>sdlc_state.py approve</code> when no human token exists.</td></tr>
+          <tr><td><strong>No code before a plan.</strong> Denies writes under <code>settings.code_paths</code>, by edit tools or the shell, until every phase before Build in the active feature's lane is <code>approved</code>.<br><span style="font-size:13px;color:var(--muted)">Default paths: <code>src/ app/ lib/ services/ packages/ api/ web/ tests/ test/</code></span></td></tr>
+          <tr><td><strong>Tests with every commit.</strong> On <code>git commit</code>, reads the staged files (plus unstaged files for <code>-a</code>) and denies the commit if code changed but no test file did. Test files are matched with globs (<code>test_*</code>, <code>*.spec.*</code>, <code>*Test.java</code>, <code>__tests__/</code>…), so <code>latest.py</code> doesn't count.</td></tr>
+          <tr><td><strong>Humans change production.</strong> Denies <code>settings.blocked_commands</code>: <code>terraform apply/destroy</code>, <code>kubectl apply/delete</code>, <code>helm install/upgrade</code>, <code>vercel --prod</code>, force-push, push to main.</td></tr>
+          <tr><td><strong>Small batches.</strong> Warns (doesn't block) when a commit changes more than <code>settings.max_diff_lines</code> lines (default 400).</td></tr>
         </tbody>
       </table></div>
       <p class="prose">A denial is returned as a <code>permissionDecision: "deny"</code> whose reason is prefixed <code>[Agentic SDLC gate]</code>, so Claude sees why it was blocked and what to do instead.</p>
@@ -418,7 +449,7 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
           <div>
             <h4>spec-writer → acceptance-criteria → requirements-reviewer</h4>
             <ul>
-              <li><strong>spec-writer:</strong> user stories <code>US-n</code> (INVEST, Must/Should/Could), measurable <code>NFR-n</code>, business rules <code>BR-n</code>, out of scope, open questions. Avoids solution language and vague words.</li>
+              <li><strong>spec-writer:</strong> user stories <code>US-n</code> (INVEST, Must/Should/Could), measurable <code>NFR-n</code> (including WCAG 2.2 AA), <strong>SLOs</strong> (SLI, target, window, error-budget policy), business rules <code>BR-n</code>, out of scope, open questions. Avoids solution language and vague words.</li>
               <li><strong>acceptance-criteria:</strong> <code>AC-n.m</code> in EARS form (<em>WHEN / WHILE / IF … THEN / WHERE … THE SYSTEM SHALL …</em>; Gherkin is also accepted). A coverage checklist covers the happy path, validation, permissions, state conflicts, dependency errors, user-visible messages and audit. Ends with a traceability table.</li>
               <li><strong>requirements-reviewer</strong> (read-only agent): looks for ambiguity, missing edge cases, untestable criteria, scope creep and missing business rules.</li>
             </ul>
@@ -436,14 +467,14 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
           <div>
             <h4>design-drafter → design-reviewer</h4>
             <ul>
-              <li>Reads the real codebase before proposing anything. Covers components, data model, APIs, sequence flows, edge cases, and a map from each AC to the design element that satisfies it.</li>
+              <li>Reads the real codebase before proposing anything. Covers components, data model, APIs, sequence flows, edge cases, a <strong>STRIDE threat model</strong> for every new trust boundary, observability for each SLO (SLIs, traces, burn-rate alerts), and a map from each AC to the design element that satisfies it.</li>
               <li>Writes ADRs for significant decisions.</li>
               <li><strong>design-reviewer</strong> (read-only agent) challenges integration assumptions, data-model risks, failure modes, security, scalability, over-engineering and requirement coverage.</li>
             </ul>
           </div>
           <div>
             <dl class="kv"><dt>Input</dt><dd>Approved requirements</dd><dt>Output</dt><dd><code>docs/03-design/design.md</code>, <code>adr/ADR-nnn-*.md</code></dd></dl>
-            <div class="gateline"><strong>Gate</strong> · Tech Lead approves the design and ADRs.</div>
+            <div class="gateline"><strong>Gate</strong> · Tech Lead approves the design, threat model and ADRs.</div>
           </div>
         </div>
       </article>
@@ -454,14 +485,14 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
           <div>
             <h4>task-breakdown</h4>
             <ul>
-              <li>Tasks <code>T-n</code> that are small (one PR, about a day or less), vertical, traceable to AC IDs, verifiable with their own definition of done, and ordered with <code>depends on</code> links.</li>
+              <li>Tasks <code>T-n</code> that are small (one PR, about a day or less, ≤ ~400 changed lines), vertical, traceable to AC IDs, and ordered with <code>depends on</code> links. Every task is checked against a shared <strong>Definition of Ready</strong> and <strong>Definition of Done</strong>.</li>
               <li>Adds cross-cutting tasks the design implies: migrations, feature flag, telemetry, docs, config. Groups tasks into milestones and estimates them; the estimates are marked as the agent's guesses.</li>
-              <li>A coverage check confirms every AC has at least one task. Creating Jira, Linear or Azure DevOps tickets is optional and only happens if you ask.</li>
+              <li>A coverage check confirms every AC has at least one task, and <code>trace</code> enforces it at the gate. Creating Jira, Linear or Azure DevOps tickets is optional and only happens if you ask (<code>sdlc-connectors</code>).</li>
             </ul>
           </div>
           <div>
             <dl class="kv"><dt>Input</dt><dd>Requirements and design</dd><dt>Output</dt><dd><code>docs/04-planning/tasks.md</code></dd></dl>
-            <div class="gateline"><strong>Gate</strong> · The team agrees tasks, sequence and priorities. <em>Approving this gate unlocks the code paths.</em></div>
+            <div class="gateline"><strong>Gate</strong> · The team agrees tasks, sequence and priorities. <em>For a feature, approving this gate unlocks the code paths.</em></div>
           </div>
         </div>
       </article>
@@ -472,9 +503,9 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
           <div>
             <h4>task-executor (one task at a time)</h4>
             <ul>
-              <li>Reads the task, its ACs and the relevant design sections, plus the code it will touch and the <code>CLAUDE.md</code> standing rules. Works on a <code>feature/&lt;task-id&gt;-&lt;slug&gt;</code> branch.</li>
+              <li>Refuses a task that isn't <strong>Ready</strong>. Reads the task, its ACs and the relevant design sections, plus the code it will touch and the <code>CLAUDE.md</code> standing rules. Works on a <code>feature/&lt;task-id&gt;-&lt;slug&gt;</code> branch, optionally in its own git worktree so independent tasks run in parallel.</li>
               <li>Test first: writes failing tests named after ACs (<code>test_ac_1_2_…</code>), makes the smallest change that passes, runs the suite and linters, then reviews its own diff.</li>
-              <li>Commits as <code>T-3: … (AC-1.1, AC-1.2)</code>, opens a PR, updates <code>tasks.md</code> and the build log, then <strong>stops</strong> so a developer can review.</li>
+              <li>Commits with <strong>Conventional Commits</strong> plus <code>Refs: T-3, AC-1.1</code> and <code>AI-Assisted: yes</code> trailers, opens a PR, updates <code>tasks.md</code> and the build log, then <strong>stops</strong> so a developer can review.</li>
               <li>If the design or an AC turns out to be wrong, it reopens that phase instead of improvising.</li>
             </ul>
           </div>
@@ -489,11 +520,12 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
         <header><span class="num">06</span><h3>QA</h3><span class="plug">sdlc-qa</span></header>
         <div class="body">
           <div>
-            <h4>qa-from-acceptance-criteria</h4>
+            <h4>qa-from-acceptance-criteria → test-auditor</h4>
             <ul>
-              <li>Writes at least one <code>TC-n</code> per AC, with negative and boundary cases (limits ±1, empty, duplicates, concurrency, time zones).</li>
+              <li>Writes at least one <code>TC-n</code> per AC, with negative and boundary cases (limits ±1, empty, duplicates, concurrency, time zones), plus accessibility (WCAG 2.2 AA) and performance checks where an NFR or SLO calls for them.</li>
               <li>Does an exploratory pass as a real user and as a malicious one. Automates missing tests in the project's own framework, runs the suite, and logs defects <code>DEF-n</code>.</li>
-              <li>Gaps go back upstream: it reopens Requirements instead of inventing the rule. It also flags false greens, meaning tests that assert nothing or mock the thing under test.</li>
+              <li>Gaps go back upstream: it reopens Requirements instead of inventing the rule.</li>
+              <li><strong>test-auditor</strong> (read-only agent): hunts for false greens (tests that assert nothing or mock the unit under test), missing cases and flaky tests, and samples mutation testing (mutmut, Stryker, PIT) when a tool exists.</li>
             </ul>
           </div>
           <div>
@@ -507,11 +539,11 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
         <header><span class="num">07</span><h3>Review</h3><span class="plug">sdlc-review</span></header>
         <div class="body">
           <div>
-            <h4>pr-reviewer → security-checklist</h4>
+            <h4>pr-reviewer → security-checklist · code-reviewer, security-reviewer</h4>
             <ul>
-              <li><strong>pr-reviewer:</strong> first-pass review of each PR against its task, ACs and design: correctness, tests, readability, conventions, performance and risk, ranked by severity.</li>
-              <li><strong>security-checklist:</strong> 11 items based on OWASP and ASVS (access control and IDOR, auth, input validation, injection, secrets, PII, dependencies, error handling, audit logging, abuse cases, configuration). Each item gets Pass, Fail or N/A with <code>file:line</code> evidence.</li>
-              <li>Any Critical or High finding must be fixed, or risk-accepted by a named person.</li>
+              <li><strong>pr-reviewer</strong> dispatches the read-only <strong>code-reviewer</strong> agent on each PR: correctness against the ACs, tests, design conformance, scope, readability, performance, operability and batch size. Findings are ranked by severity and carry a Status (<code>Open</code>, <code>Fixed</code>, <code>Accepted</code>).</li>
+              <li><strong>security-checklist</strong> dispatches the <strong>security-reviewer</strong> agent. It runs whichever scanners are installed (Semgrep or CodeQL, gitleaks, osv-scanner, npm audit, pip-audit, checkov) and checks 13 items based on OWASP and ASVS: access control and IDOR, auth, input validation, injection, secrets, PII, supply chain, error handling, audit logging, abuse cases, configuration, <strong>LLM and agent risks</strong> (OWASP Top 10 for LLM Apps), and threat-model coverage. Each item gets Pass, Fail or N/A with <code>file:line</code> evidence.</li>
+              <li>Any Critical or High finding must be fixed, or risk-accepted by a named person. The exit check refuses to submit Review while one is <code>Open</code>.</li>
             </ul>
           </div>
           <div>
@@ -527,7 +559,7 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
           <div>
             <h4>release-notes (+ pipeline-fixer)</h4>
             <ul>
-              <li><strong>release-notes:</strong> a release plan (feature flag, staged rollout, monitoring, rollback, go/no-go checklist) and release notes for three audiences: business users, support staff and engineers.</li>
+              <li><strong>release-notes:</strong> a release plan (feature flag, staged rollout, monitoring against SLOs and error budget, rollback, go/no-go checklist), a <strong>SemVer</strong> bump and <strong>CHANGELOG</strong> derived from the Conventional Commits, the supply-chain record (SBOM, SLSA provenance, signing), and release notes for three audiences: business users, support staff and engineers. Humans deploy and then <code>record deploy</code>.</li>
               <li><strong>pipeline-fixer:</strong> reads CI/CD logs, sorts the root cause into code, flaky test, environment, config or dependency, and proposes the smallest fix. It is also useful on its own.</li>
             </ul>
           </div>
@@ -544,8 +576,8 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
           <div>
             <h4>incident-summarizer</h4>
             <ul>
-              <li><strong>Health check mode:</strong> a post-release monitoring summary.</li>
-              <li><strong>Incident mode:</strong> a blameless RCA with timeline, impact, root cause from 5 whys, the fix, and follow-ups. Follow-ups include new acceptance criteria that go back into Requirements, and candidate standing rules.</li>
+              <li><strong>Health check mode:</strong> a post-release monitoring summary: each SLO against its target and remaining error budget, the success metric, and rollback rehearsal (game day) results.</li>
+              <li><strong>Incident mode:</strong> a blameless RCA with detection, timeline, impact, root cause from 5 whys, the fix, and follow-ups. Follow-ups include new acceptance criteria that go back into Requirements, and candidate standing rules. It records <code>incident</code> and <code>restore</code> events for the DORA metrics.</li>
             </ul>
           </div>
           <div>
@@ -561,7 +593,7 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
           <div>
             <h4>retro-capture → knowledge-updater</h4>
             <ul>
-              <li><strong>retro-capture:</strong> gathers evidence from the state history first. It computes cycle time per phase, the number of feedback loops, gaps caught before production, escaped defects, and an AI catch rate. Then it runs the retro and proposes concrete, checkable rules.</li>
+              <li><strong>retro-capture:</strong> gathers evidence first, starting from <code>sdlc_state.py metrics</code>: the <strong>DORA</strong> metrics (deployment frequency, lead time, change failure rate, time to restore), plus cycle time and approval wait per phase, review rounds, feedback loops, escaped defects, and an AI catch rate. Then it runs the retro and proposes concrete, checkable rules.</li>
               <li><strong>knowledge-updater:</strong> writes only the rules the team adopted into <code>CLAUDE.md</code>'s "Standing rules" section. It removes duplicates and cites the source, for example <code>(RCA-2026-031)</code>. It can also draft improvements to the marketplace's own skills for you to review.</li>
             </ul>
           </div>
@@ -592,6 +624,7 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
       <h3>What a managed project looks like</h3>
 <pre><code>your-project/
 ├── .sdlc/state.json             <span class="cmt"># process memory; never edited by hand</span>
+├── .sdlc/approval-token.json    <span class="cmt"># exists only between typing /sdlc-core:approve and the approval</span>
 ├── CLAUDE.md                    <span class="cmt"># SDLC rules + "Standing rules learned on this project"</span>
 ├── docs/
 │   ├── 01-discovery/problem-brief.md
@@ -603,60 +636,79 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
 │   ├── 07-review/review-report.md
 │   ├── 08-release/release-plan.md, release-notes.md
 │   ├── 09-operate/monitoring.md, RCA-*.md
-│   └── 10-knowledge/retro.md
-└── src/ tests/ …                <span class="cmt"># locked until Planning is approved</span></code></pre>
+│   ├── 10-knowledge/retro.md
+│   └── features/&lt;slug&gt;/01-…/      <span class="cmt"># later features get their own tree</span>
+└── src/ tests/ …                <span class="cmt"># locked until the lane's pre-Build phases are approved</span></code></pre>
+      <p class="prose"><code>sdlc_state.py trace</code> parses these documents and prints the AC → task → test case → result matrix, plus every orphan: an AC without a task or test, a task without an AC, a failing or unrun test case, an open high-severity defect or review finding.</p>
     </section>
 
     <!-- 9 -->
     <section id="state">
       <h2>The state file</h2>
-      <p class="prose"><code>.sdlc/state.json</code> is the process's memory. <code>sdlc_state.py</code> writes it atomically (to a temp file, then <code>os.replace</code>) and appends every change to <code>history</code>. Here is an abbreviated example from partway through a run:</p>
+      <p class="prose"><code>.sdlc/state.json</code> is the process's memory. <code>sdlc_state.py</code> writes it atomically (to a temp file, then <code>os.replace</code>) and appends every change to <code>history</code>. Version-1 files are migrated in place the first time a v0.2 script reads them. Here is an abbreviated example from partway through a run:</p>
 <pre><code>{
-  "schema_version": 1,
+  "schema_version": 2,
   "project": "Membership Freeze",
-  "slug": "membership-freeze",
   "approvers": { "product_owner": "Tito", "tech_lead": "Tito", "qa_lead": "Tito", "team": "Tito" },
   "settings": {
     "code_paths": ["src/", "app/", "lib/", "services/", "packages/", "api/", "web/", "tests/", "test/"],
     "require_tests_on_commit": true,
-    "test_markers": ["test", "spec", "__tests__"]
+    "test_patterns": ["test_*", "*_test.*", "*.test.*", "*.spec.*", "*Test.java", "tests/", "__tests__/", "…"],
+    "max_diff_lines": 400,
+    "blocked_commands": ["\\bterraform\\s+(apply|destroy)\\b", "…"]
   },
-  "current_phase": "requirements",
-  "phases": {
-    "discovery": { "status": "approved", "artifacts": ["docs/01-discovery/problem-brief.md"],
-                   "approved_by": "Tito", "approved_on": "2026-10-01", "open_issues": [] },
-    "requirements": { "status": "in_review", "artifacts": ["docs/02-requirements/requirements.md"],
-                      "approved_by": null, "approved_on": null,
-                      "open_issues": [{ "id": "REQ-1", "text": "Check-in while frozen?",
-                                        "raised": "2026-10-01", "resolved": false }] },
-    "design": { "status": "not_started", … }
-    <span class="cmt">// … planning through knowledge</span>
+  "active_feature": "membership-freeze",
+  "features": {
+    "membership-freeze": {
+      "type": "feature", "docs_root": "docs",
+      "lane": ["discovery", "requirements", "design", "planning", "build", "qa", "review", "release", "operate", "knowledge"],
+      "phases": {
+        "discovery": { "status": "approved", "artifacts": ["docs/01-discovery/problem-brief.md"],
+                       "artifact_hashes": { "docs/01-discovery/problem-brief.md": "9f2c…" },
+                       "approved_by": "Tito", "approved_on": "2026-10-01", "open_issues": [] },
+        "requirements": { "status": "in_review", "artifacts": ["docs/02-requirements/requirements.md"],
+                          "open_issues": [{ "id": "REQ-1", "text": "Check-in while frozen?",
+                                            "raised": "2026-10-01", "resolved": false }] },
+        "design": { "status": "not_started", … }
+        <span class="cmt">// … planning through knowledge</span>
+      }
+    },
+    "login-500s": { "type": "hotfix", "docs_root": "docs/features/login-500s", … }
   },
   "history": [
     { "ts": "…", "event": "project_created", "by": "Tito", "note": "Membership Freeze" },
-    { "ts": "…", "event": "approved", "phase": "discovery", "by": "Tito" },
-    { "ts": "…", "event": "issue_added", "phase": "requirements", "note": "REQ-1: Check-in while frozen?" }
+    { "ts": "…", "event": "approved", "feature": "membership-freeze", "phase": "discovery", "by": "Tito",
+      "via": "slash-command", "git_user": "Tito" },
+    { "ts": "…", "event": "issue_added", "feature": "membership-freeze", "phase": "requirements",
+      "note": "REQ-1: Check-in while frozen?" },
+    { "ts": "…", "event": "deploy", "feature": "membership-freeze", "note": "1.4.0 stage 1" }
   ]
 }</code></pre>
-      <p class="prose">Approver names default to the Product Owner given at <code>init</code>. Tech Lead and QA Lead can be set separately with <code>--tech-lead</code> and <code>--qa-lead</code>. The phase definitions themselves (skills, artifacts, gate text, approver role) live in the <code>PHASES</code> list at the top of <code>sdlc_state.py</code>, not in the state file.</p>
+      <p class="prose">Approver names default to the Product Owner given at <code>init</code>. Tech Lead and QA Lead can be set separately with <code>--tech-lead</code> and <code>--qa-lead</code>. The phase definitions themselves (skills, agents, artifacts, gate text, approver role) and the lanes live in the <code>PHASES</code> and <code>LANES</code> lists at the top of <code>sdlc_state.py</code>, not in the state file.</p>
     </section>
 
     <!-- 10 -->
     <section id="cli">
       <h2>State script CLI</h2>
-      <p class="prose">Skills call this script. You can also run it directly to inspect a project. Path: <code>plugins/sdlc-core/scripts/sdlc_state.py</code>.</p>
+      <p class="prose">Skills call this script through <code>run_py.sh</code>. You can also run it directly to inspect a project. Path: <code>plugins/sdlc-core/scripts/sdlc_state.py</code>. Every per-feature command accepts <code>--feature &lt;slug&gt;</code>, and the default is the active feature.</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Command</th><th>Effect</th></tr></thead>
         <tbody>
-          <tr><td><code>init "&lt;Name&gt;" --approver N [--tech-lead N] [--qa-lead N] [--dir P]</code></td><td>Creates the state file, the <code>docs/</code> phase folders and <code>CLAUDE.md</code>. If a <code>CLAUDE.md</code> already exists, the SDLC section is appended to it.</td></tr>
-          <tr><td><code>status [--json]</code></td><td>Prints a table of phases with markers <code>OK</code> approved, <code>??</code> in review, <code>..</code> draft, <code>!!</code> reopened.</td></tr>
-          <tr><td><code>next [--json]</code></td><td>Returns the phase to work on, with its skills, agents, artifacts, gate, approver, open issues and the action to take.</td></tr>
-          <tr><td><code>set-status &lt;phase&gt; draft|in_review [--artifact P]…</code></td><td>Moves a phase forward. Refuses if the previous phase isn't approved.</td></tr>
-          <tr><td><code>approve &lt;phase&gt; --by N [--note T] [--accept-open-issues]</code></td><td>The human gate. Requires <code>in_review</code> and a name.</td></tr>
-          <tr><td><code>reopen &lt;phase&gt; --reason T [--by N]</code></td><td>Sets the phase to <code>reopened</code> and adds the reason as an open issue.</td></tr>
+          <tr><td><code>init "&lt;Name&gt;" --approver N [--tech-lead N] [--qa-lead N] [--type LANE] [--dir P]</code></td><td>Creates the state file, the lane's phase folders and <code>CLAUDE.md</code>. If a <code>CLAUDE.md</code> already exists, the SDLC section is appended to it.</td></tr>
+          <tr><td><code>feature new "&lt;Name&gt;" [--type LANE] [--docs-root P]</code> · <code>feature list</code> · <code>feature switch &lt;slug&gt;</code></td><td>Adds, lists and switches features (work items) in one project.</td></tr>
+          <tr><td><code>status [--json] [--all]</code></td><td>Prints a table of phases with markers <code>OK</code> approved, <code>??</code> in review, <code>..</code> draft, <code>!!</code> reopened, <code>~~</code> needs revalidation. It also shows stale approvals and the code-lock state.</td></tr>
+          <tr><td><code>next [--json]</code></td><td>Returns the phase to work on, with its skills, agents, inputs, artifacts, gate, approver, open issues and the action to take.</td></tr>
+          <tr><td><code>set-status &lt;phase&gt; draft|in_review [--artifact P]… [--force-reason T]</code></td><td>Moves a phase forward. Refuses if the previous lane phase isn't approved, or if the exit checks fail (unless forced, which records an open issue).</td></tr>
+          <tr><td><code>approve &lt;phase&gt; --by N [--note T] [--accept-open-issues]</code></td><td>The human gate. Requires <code>in_review</code>, a name and a human-intent token (or a terminal confirmation). Stores artifact hashes.</td></tr>
+          <tr><td><code>reopen &lt;phase&gt; --reason T [--by N]</code></td><td>Sets the phase to <code>reopened</code>, adds the reason as an open issue, and marks later approved phases <code>needs_revalidation</code>.</td></tr>
+          <tr><td><code>verify [--json]</code></td><td>Lists approved phases whose artifacts changed since approval. Exits 1 if any did.</td></tr>
+          <tr><td><code>trace [--json]</code></td><td>Prints the AC → task → test case → result matrix and orphans.</td></tr>
+          <tr><td><code>metrics [--json]</code></td><td>DORA metrics, plus per-phase cycle time, approval wait, review rounds and reopens.</td></tr>
+          <tr><td><code>record deploy|incident|restore [--note T] [--ref ID]</code></td><td>Records delivery events for the DORA metrics.</td></tr>
+          <tr><td><code>settings show|add-code-path|remove-code-path|require-tests|add-test-pattern|remove-test-pattern|block-command|unblock-command|max-diff-lines</code></td><td>Tunes the gates. Changes that weaken a gate need a human token.</td></tr>
           <tr><td><code>issue add &lt;phase&gt; "&lt;question&gt;"</code></td><td>Records a decision only a person can make.</td></tr>
           <tr><td><code>issue resolve &lt;phase&gt; &lt;ID&gt; --note "&lt;decision&gt;"</code></td><td>Records the decision and timestamps the resolution.</td></tr>
-          <tr><td><code>phases [--json]</code></td><td>Prints the process definition.</td></tr>
+          <tr><td><code>phases [--json]</code> · <code>lanes [--json]</code></td><td>Prints the process definition and the work-type lanes.</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -682,7 +734,9 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
 /plugin install sdlc-review@agentic-sdlc
 /plugin install sdlc-release@agentic-sdlc
 /plugin install sdlc-ops@agentic-sdlc
-/plugin install sdlc-knowledge@agentic-sdlc</code></pre><button type="button" data-copy>Copy</button></div>
+/plugin install sdlc-knowledge@agentic-sdlc
+<span class="cmt"># optional: GitHub / Linear / Jira MCP servers</span>
+/plugin install sdlc-connectors@agentic-sdlc</code></pre><button type="button" data-copy>Copy</button></div>
         </div>
       </div>
 
@@ -696,7 +750,8 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
   → requirements.md <span style="color:var(--review)">in_review</span>, open issue REQ-1: "check-in while frozen?"
 "Deny check-in, offer early unfreeze"      → REQ-1 resolved
 /sdlc-core:approve                         → Requirements <span style="color:var(--accent)">approved</span>
-/sdlc-core:next                            → design-drafter + design-reviewer …
+/sdlc-core:next                            → design-drafter (+ STRIDE) + design-reviewer …
+/sdlc-core:init "Login 500s" --type hotfix → second feature; code unlocked, review still required
 /sdlc-core:status                          <span class="cmt"># any time, any session</span></code></pre>
 
       <h3>Updating the marketplace</h3>
@@ -708,42 +763,46 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
       <h2>Extending</h2>
       <div class="prose">
         <h3>Change the process</h3>
-        <p>The <code>PHASES</code> list in <code>sdlc_state.py</code> is the machine-readable process. <code>docs/process.md</code> is the human-readable version, and the conductor's "phase contract" table is the fallback. Keep all three in sync when you add, remove or reorder a phase.</p>
+        <p>The <code>PHASES</code> and <code>LANES</code> lists in <code>sdlc_state.py</code> are the machine-readable process. <code>docs/process.md</code> is the human-readable version, and the conductor's "phase contract" table is the fallback. <code>tools/check_consistency.py</code> (run in CI) fails when they drift apart, or when a skill or agent named in <code>PHASES</code> doesn't exist. Exit checks live in <code>PHASE_TRACE_CHECKS</code> and <code>PHASE_HEADING_CHECKS</code>.</p>
+        <h3>Add a work type</h3>
+        <p>Add an entry to <code>LANES</code> with its phase subset (kept in <code>PHASES</code> order) and a description, then add a row to the lanes table in <code>docs/process.md</code>.</p>
         <h3>Add a skill to a phase</h3>
         <p>Create <code>plugins/&lt;plugin&gt;/skills/&lt;name&gt;/SKILL.md</code> with <code>name</code> and <code>description</code> frontmatter, then add <code>"&lt;plugin&gt;:&lt;name&gt;"</code> to that phase's <code>skills</code> list so the conductor runs it in order. End the skill by handing back to <code>sdlc-core:conductor</code>.</p>
         <h3>Add a reviewer agent</h3>
-        <p>Add <code>plugins/&lt;plugin&gt;/agents/&lt;name&gt;.md</code> with <code>tools: Read, Grep, Glob</code> so it can only read, and list it under the phase's <code>agents</code>.</p>
+        <p>Add <code>plugins/&lt;plugin&gt;/agents/&lt;name&gt;.md</code> with <code>tools: Read, Grep, Glob</code> (add <code>Bash</code> only for read-only git, tests and scanners, and say so in the prompt), and list it under the phase's <code>agents</code>. The conductor runs it as a subagent.</p>
+        <h3>Add an eval</h3>
+        <p>Create <code>plugins/&lt;plugin&gt;/evals/&lt;case&gt;/prompt.md</code> and <code>graders/*.md</code> (or run <code>claude plugin eval init</code>), then run <code>claude plugin eval plugins/&lt;plugin&gt;</code>.</p>
         <h3>Add a new plugin</h3>
         <p>Create <code>plugins/&lt;name&gt;/.claude-plugin/plugin.json</code> and add an entry to <code>.claude-plugin/marketplace.json</code> with <code>name</code>, <code>source</code> and <code>description</code>. Bump <code>version</code> when you ship changes.</p>
         <h3>Tune enforcement per project</h3>
-        <p><code>settings.code_paths</code>, <code>settings.test_markers</code> and <code>settings.require_tests_on_commit</code> live in each project's state file. Because the hook blocks direct edits, change them through the script, or extend the script with a <code>settings</code> command.</p>
+        <p><code>code_paths</code>, <code>require_tests_on_commit</code>, <code>test_patterns</code>, <code>blocked_commands</code> and <code>max_diff_lines</code> live in each project's state file. Change them with <code>/sdlc-core:settings</code>. Tightening works at any time. Weakening needs the human token.</p>
       </div>
       <h3>Roadmap</h3>
       <ul class="prose">
-        <li>Connectors (<code>.mcp.json</code>) for Jira and GitHub in Planning, Build and Review</li>
-        <li>Evals for each skill</li>
-        <li>Configurable phase sets, such as a "lite" path for small changes</li>
+        <li>Approvals mirrored from GitHub PR reviews and CODEOWNERS through the connectors plugin</li>
+        <li>More eval cases per skill, and scheduled eval runs in CI</li>
+        <li>Organisation-level policy packs (regulated-industry lanes, extra gates)</li>
       </ul>
     </section>
 
     <!-- 13 -->
     <section id="limits">
       <h2>Known limitations</h2>
-      <div class="note warn prose"><p>These are behaviours of version 0.1.0 worth knowing before you depend on the gates.</p></div>
+      <div class="note warn prose"><p>These are behaviours of version 0.2.0 worth knowing before you depend on the gates.</p></div>
       <div class="table-wrap"><table>
         <thead><tr><th>Area</th><th>Behaviour</th><th>Effect</th></tr></thead>
         <tbody>
-          <tr><td>Python launcher</td><td>Hooks and skills call <code>python3</code>.</td><td>On Windows, <code>python3</code> is sometimes only the Microsoft Store stub, and the hooks fail if it is. Check with <code>python3 --version</code>.</td></tr>
-          <tr><td>Test detection</td><td>A file counts as a test if its path contains <code>test</code>, <code>spec</code> or <code>__tests__</code> anywhere.</td><td><code>src/contest.ts</code> or <code>specials.py</code> would satisfy the test-with-commit rule.</td></tr>
-          <tr><td>Shell guard</td><td>Shell writes to the state file are caught with a regex for common write commands.</td><td>Fine for keeping a well-behaved agent on track, but not a security boundary.</td></tr>
+          <tr><td>Shell guard</td><td>Shell and PowerShell writes are parsed best-effort: redirects, common write commands, and inline scripts.</td><td>It keeps a well-behaved agent on track, but it isn't a sandbox. A determined process can find another way to write a file. Approvals don't rely on it, because the state script checks the token itself.</td></tr>
+          <tr><td>Approval token</td><td>The token proves the user typed the slash command in this project within the last 30 minutes.</td><td>It proves intent, not identity. The approver name is still whatever <code>--by</code> says, plus the recorded git identity. If your Claude Code build doesn't pass slash commands to <code>UserPromptSubmit</code>, approve from a terminal instead, where the script asks for confirmation.</td></tr>
+          <tr><td>Trace parsing</td><td>IDs are read from markdown tables, headings and bullets with regular expressions.</td><td>Artifacts that drift far from the templates can produce false gaps. Fix the artifact, or override with <code>--force-reason</code>, which the approver sees.</td></tr>
+          <tr><td>Stale detection</td><td>Only artifact files are hashed.</td><td>Code changed after the Build approval doesn't make Build stale. Review and the PR process cover code.</td></tr>
           <tr><td>Code-path match</td><td>Paths are matched by prefix from the project root.</td><td>Code outside the listed folders, such as root-level scripts or <code>cmd/</code>, isn't gated until you add it to <code>code_paths</code>.</td></tr>
-          <tr><td>Approver identity</td><td>Approval records whatever name is passed to <code>--by</code>.</td><td>It's an audit trail, not authentication. Anyone at the keyboard can type the command.</td></tr>
-          <tr><td>Settings</td><td>There's no CLI command to change <code>settings</code>.</td><td>Tuning enforcement for a project currently means extending the script.</td></tr>
+          <tr><td>Approver identity</td><td>Approval records whatever name is passed to <code>--by</code>, plus how it was requested and the git identity.</td><td>It's an audit trail, not authentication. Anyone at the keyboard can type the command.</td></tr>
         </tbody>
       </table></div>
     </section>
 
-    <footer>Agentic SDLC Marketplace · owner Tito · MIT license · written from the source of version 0.1.0</footer>
+    <footer>Agentic SDLC Marketplace · owner Tito · MIT license · written from the source of version 0.2.0</footer>
   </main>
 </div>
 

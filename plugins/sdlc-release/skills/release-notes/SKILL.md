@@ -13,7 +13,9 @@ Inputs: approved requirements, design (rollout section), review report, merged P
 3. **Pre-flight:** migrations order, config/secrets, dependencies on other teams, support readiness.
 4. **Monitoring:** which dashboards/metrics/alerts prove it's healthy (from design §Observability) and the success metric from the brief.
 5. **Rollback:** exact steps and who can trigger it; data implications.
-6. **Go/no-go checklist** for the human decision.
+6. **Version and changelog:** derive the SemVer bump from the Conventional Commits since the last tag (`feat` → minor, `fix` → patch, `!`/`BREAKING CHANGE` → major). Generate the CHANGELOG entry from those commits, grouped by type, with task and AC refs.
+7. **Supply chain:** list the build's SBOM (e.g. `syft . -o cyclonedx-json` or the CI artifact), provenance/attestation (SLSA level reached, e.g. GitHub artifact attestations), and artifact signing (e.g. cosign). If any is missing, say so. Don't invent it.
+8. **Go/no-go checklist** for the human decision, including the SLO error budget (don't release into an exhausted budget).
 
 ## Release notes (three audiences)
 - **Business / customers:** what's new and why it matters, in plain language. No jargon.
@@ -23,6 +25,6 @@ Inputs: approved requirements, design (rollout section), review report, merged P
 Keep each short. Don't promise anything not in the approved scope.
 
 ## Human gate
-Go/no-go and rollout stage advances are decided by the **Product Owner and stakeholders**. Present the plan; don't flip flags or deploy to production without explicit approval.
+Go/no-go and rollout stage advances are decided by the **Product Owner and stakeholders**. Present the plan; don't flip flags or deploy to production without explicit approval. Deploy commands are blocked by a hook, so the human runs them. After each real deployment, record it with the state script's `record deploy --note "<version> stage <n>"` so the DORA metrics are accurate.
 
 Hand back to `sdlc-core:conductor`.

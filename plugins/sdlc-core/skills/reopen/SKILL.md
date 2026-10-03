@@ -13,6 +13,6 @@ Use this when work in a later phase reveals that an earlier, approved artifact i
 1. Identify the **earliest** phase whose artifact must change (a missing business rule → `requirements`; a wrong integration approach → `design`).
 2. Run:
    ```
-   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/sdlc_state.py" reopen <phase> --reason "<concise gap description>" --by "<who found it>"
+   sh "${CLAUDE_PLUGIN_ROOT}/scripts/run_py.sh" "${CLAUDE_PLUGIN_ROOT}/scripts/sdlc_state.py" reopen <phase> --reason "<concise gap description>" --by "<who found it>"
    ```
-3. Tell the user in two lines: what gap was found, which phase was reopened, and that the decision needed is theirs. The conductor will route back to that phase on the next `/sdlc-core:next`.
+3. Tell the user in two lines: what gap was found, which phase was reopened, and that the decision needed is theirs. Approved phases after it are now marked `needs_revalidation`. The conductor routes back to the reopened phase on the next `/sdlc-core:next`, then re-checks each of those phases.

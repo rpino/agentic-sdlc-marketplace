@@ -1,7 +1,7 @@
 {
   "name": "sdlc-planning",
   "displayName": "SDLC 4 · Planning",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Phase 4 of the Agentic SDLC: breaks an approved design into small, sequenced, traceable tasks with definitions of done, ready for sprint planning and optional Jira/Linear sync.",
   "author": { "name": "Tito", "email": "pino.islas@gmail.com" },
   "license": "MIT",

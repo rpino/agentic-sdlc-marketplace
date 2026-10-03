@@ -39,12 +39,28 @@ sequenceDiagram
 | Case | Handling | AC |
 |---|---|---|
 
-## 5. Security, privacy, audit
+## 5. Security, privacy & threat model
+### 5.1 Threat model (STRIDE)
+| Asset / flow | Threat (S/T/R/I/D/E) | Scenario | Mitigation | AC / NFR |
+|---|---|---|---|---|
+| | Spoofing | | | |
+| | Tampering | | | |
+| | Repudiation | | | |
+| | Information disclosure | | | |
+| | Denial of service | | | |
+| | Elevation of privilege | | | |
+
+### 5.2 Privacy & audit
+- PII touched / retention:
+- Audit events:
+- LLM / agent use (if any): prompt-injection and data-exposure controls:
 
 ## 6. Observability
-- Logs:
+- SLOs implemented (from requirements) and their SLIs:
+- Traces (OpenTelemetry spans for the new flows):
+- Logs (structured, no PII):
 - Metrics:
-- Alerts:
+- Alerts (on SLO burn rate, not raw errors):
 
 ## 7. Rollout & rollback
 - Feature flag:

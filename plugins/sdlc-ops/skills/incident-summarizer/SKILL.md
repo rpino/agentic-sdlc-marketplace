@@ -9,7 +9,7 @@ argument-hint: "[incident description, alert, log or ticket]"
 Input: `$ARGUMENTS` plus any logs, alerts, tickets or chat the user provides (or a monitoring/incident connector if available).
 
 ## Health check mode (no incident)
-If there's no incident, write `docs/09-operate/monitoring.md`: rollout stage, health metrics vs. expectations, success metric vs. the brief's target, open defects, and a recommendation (advance rollout / hold / roll back). Advancing or rolling back is a human decision.
+If there's no incident, write `docs/09-operate/monitoring.md`: rollout stage, each **SLO vs. target and error budget remaining**, health metrics vs. expectations, success metric vs. the brief's target, open defects, the result of a **rollback rehearsal / game day** if one was run, and a recommendation (advance rollout / hold / roll back). A burning error budget means hold. Advancing or rolling back is a human decision.
 
 ## Incident mode
 Write `docs/09-operate/RCA-<yyyy>-<nn>.md` using `${CLAUDE_PLUGIN_ROOT}/templates/rca.md`:
@@ -23,5 +23,7 @@ Write `docs/09-operate/RCA-<yyyy>-<nn>.md` using `${CLAUDE_PLUGIN_ROOT}/template
    - new/changed **acceptance criteria** → under the conductor, `sdlc-core:reopen requirements "<new AC>"`
    - new **tests**
    - a **standing rule** for `CLAUDE.md` (handed to `sdlc-knowledge:knowledge-updater`)
+
+Under the conductor, record the incident for the DORA metrics: `record incident --ref RCA-<yyyy>-<nn>` when it starts, and `record restore --ref RCA-<yyyy>-<nn>` when service is restored. Change failure rate and time to restore come from these.
 
 Customer/stakeholder communication and refunds/compensation are human decisions — draft them, don't send them.

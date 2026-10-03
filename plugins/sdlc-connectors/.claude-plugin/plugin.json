@@ -1,0 +1,10 @@
+{
+  "name": "sdlc-connectors",
+  "displayName": "SDLC Connectors (GitHub, Jira, Linear)",
+  "version": "0.1.0",
+  "description": "Optional MCP connectors for the Agentic SDLC: GitHub (PRs, reviews, checks) for build and review, and Jira or Linear (tickets from tasks.md) for planning. Install only the ones your team uses.",
+  "author": { "name": "Tito", "email": "pino.islas@gmail.com" },
+  "license": "MIT",
+  "keywords": ["sdlc", "mcp", "github", "jira", "linear", "connectors"],
+  "dependencies": ["sdlc-core"]
+}
