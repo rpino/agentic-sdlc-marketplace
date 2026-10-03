@@ -273,7 +273,7 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
 ├── docs/process.md             <span class="cmt"># human-readable process definition</span>
 ├── tests/                      <span class="cmt"># unittest suite for the state machine and every hook</span>
 ├── tools/check_consistency.py  <span class="cmt"># PHASES ↔ plugins ↔ process.md ↔ README</span>
-├── README.md · LICENSE · .gitignore
+├── README.md · CHANGELOG.md · CONTRIBUTING.md · SECURITY.md · LICENSE
 └── plugins/
     ├── sdlc-core/              <span class="cmt"># the backbone</span>
     │   ├── .claude-plugin/plugin.json
@@ -797,6 +797,7 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
           <tr><td>Trace parsing</td><td>IDs are read from markdown tables, headings and bullets with regular expressions.</td><td>Artifacts that drift far from the templates can produce false gaps. Fix the artifact, or override with <code>--force-reason</code>, which the approver sees.</td></tr>
           <tr><td>Stale detection</td><td>Only artifact files are hashed.</td><td>Code changed after the Build approval doesn't make Build stale. Review and the PR process cover code.</td></tr>
           <tr><td>Code-path match</td><td>Paths are matched by prefix from the project root.</td><td>Code outside the listed folders, such as root-level scripts or <code>cmd/</code>, isn't gated until you add it to <code>code_paths</code>.</td></tr>
+          <tr><td>Security model</td><td>The gates keep an over-eager agent inside the process. They are not a sandbox and not authentication.</td><td>See <code>SECURITY.md</code> for exactly what each gate protects, and how to report a way around one.</td></tr>
           <tr><td>Approver identity</td><td>Approval records whatever name is passed to <code>--by</code>, plus how it was requested and the git identity.</td><td>It's an audit trail, not authentication. Anyone at the keyboard can type the command.</td></tr>
         </tbody>
       </table></div>
