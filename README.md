@@ -29,7 +29,12 @@ You don't call skills one by one. You use a few commands, and the conductor runs
 
 The conductor can also reopen an earlier phase (`/sdlc-core:reopen`) when a later one finds a gap.
 
-**Full documentation:** [docs/guide.html](docs/guide.html) is an illustrated reference. [docs/process.md](docs/process.md) is the process definition.
+**Documentation:**
+- [docs/guide.html](docs/guide.html): illustrated reference
+- [docs/process.md](docs/process.md): process definition
+- [CHANGELOG.md](CHANGELOG.md): what changed in each version, with upgrade notes
+- [CONTRIBUTING.md](CONTRIBUTING.md): how to change the marketplace
+- [SECURITY.md](SECURITY.md): what the gates do and don't protect against, and how to report a bypass
 
 ---
 
@@ -164,7 +169,7 @@ python tools/check_consistency.py             # PHASES ↔ plugins ↔ docs/proc
 claude plugin validate --strict plugins/<p>   # manifests, skills, agents
 claude plugin eval plugins/<p>                # behaviour evals in plugins/<p>/evals/
 ```
-CI (`.github/workflows/ci.yml`) runs the tests on Linux, macOS and Windows, plus the consistency check and strict validation. The evals run on demand (`workflow_dispatch`) because they call the model.
+CI (`.github/workflows/ci.yml`) runs the tests on Linux, macOS and Windows, plus the consistency check and strict validation. The evals run on demand (`workflow_dispatch`) because they call the model. See [CONTRIBUTING.md](CONTRIBUTING.md) for where each kind of change goes, and record user-visible changes in [CHANGELOG.md](CHANGELOG.md).
 
 ## Repository layout
 
@@ -180,6 +185,7 @@ plugins/<plugin>/                 ← one folder per plugin
 tests/                            ← unittest suite for sdlc-core scripts and hooks
 tools/check_consistency.py
 docs/process.md, docs/guide.html
+CHANGELOG.md, CONTRIBUTING.md, SECURITY.md
 ```
 
 ## Roadmap
