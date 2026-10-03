@@ -5,6 +5,7 @@
 | | T-1 | AC-1.1 | | | Approve / Changes requested |
 
 ## Findings
+<!-- Status: Open / Fixed / Accepted (<name>). Open Blocker/Major/Critical/High rows block approval. -->
 | File:line | Severity | Finding | Suggested fix | Status |
 |---|---|---|---|---|
 
@@ -12,6 +13,13 @@
 | # | Check | Result | Evidence |
 |---|---|---|---|
 | 1 | Access control | | |
+
+## Scanner results
+| Tool | Command | Result |
+|---|---|---|
+| SAST (semgrep/CodeQL) | | |
+| Secrets (gitleaks) | | |
+| Dependencies (osv-scanner / npm audit / pip-audit) | | |
 
 ## Sign-off
 - [ ] No open Blocker/Major findings

@@ -15,7 +15,7 @@ Input: `docs/01-discovery/problem-brief.md` (approved). Output: `docs/02-require
    - ID `US-n`, format: *As a <role>, I want <capability> so that <benefit>.*
    - Each story is **independent, small and valuable** (INVEST). Split stories bigger than ~1 sprint.
    - Add a **priority** (Must / Should / Could) and the **brief section** it traces to.
-4. **Non-functional requirements** — `NFR-n` for performance, security, privacy, accessibility, audit, availability, compliance. Make each measurable ("p95 < 300 ms", "WCAG 2.1 AA").
+4. **Non-functional requirements** — `NFR-n` for performance, security, privacy, accessibility, audit, availability, compliance. Make each measurable ("p95 < 300 ms", "WCAG 2.2 AA"). Write availability and latency as **SLOs**: an SLI (what is measured), a target and a window, e.g. "99.9% of freeze requests succeed over 28 days". The error budget that follows from each SLO drives the rollout and operate decisions later.
 5. **Business rules** — `BR-n` for policies the system must enforce (limits, eligibility, fees).
 6. **Out of scope** and **open questions** — carried over from the brief plus new ones.
 7. Leave the **Acceptance criteria** placeholders under each story — the `acceptance-criteria` skill fills them next.

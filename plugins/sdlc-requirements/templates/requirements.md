@@ -32,6 +32,12 @@ As a **<role>**, I want **<capability>** so that **<benefit>**.
 |---|---|---|
 | NFR-1 | Performance | |
 | NFR-2 | Security | |
+| NFR-3 | Accessibility | WCAG 2.2 AA |
+
+**Service level objectives**
+| ID | SLI (what we measure) | Target | Window | Error budget policy |
+|---|---|---|---|---|
+| SLO-1 | Successful requests / all requests for <capability> | 99.9% | 28 days | Freeze rollout if budget is exhausted |
 
 ## 5. Out of scope
 -

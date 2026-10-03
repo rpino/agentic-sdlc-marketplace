@@ -17,10 +17,11 @@ Inputs: `docs/02-requirements/requirements.md` (approved), the codebase. Outputs
    - API / interface contracts (request, response, errors)
    - Sequence diagram for the main flow(s) (Mermaid)
    - Edge cases & failure modes, with how each is handled
-   - Security & privacy (authz, PII, audit), observability (logs/metrics/alerts)
+   - **Threat model (STRIDE)** for every new data flow and trust boundary: spoofing, tampering, repudiation, information disclosure, denial of service, elevation of privilege. Each threat gets a mitigation that becomes an AC, NFR or task.
+   - Security & privacy (authz, PII, audit), observability (SLIs for each SLO, traces, logs, burn-rate alerts)
    - Rollout: feature flag, migration order, rollback
 4. **Options for big decisions.** Where there is a real choice (sync vs. async, new service vs. module, vendor A vs. B), write an ADR with at least two options, trade-offs and a recommendation. Mark it *Proposed* — the Tech Lead decides.
-5. **Risks & open questions** — integration unknowns, performance doubts, anything needing a spike → open questions (and `sdlc_state.py issue add design "<question>"` under the conductor).
+5. **Risks & open questions** — integration unknowns, performance doubts, anything needing a spike → open questions (and `issue add design "<question>"` with the state script under the conductor).
 6. **Review.** Run the `design-reviewer` agent if available and fold in its findings.
 
 ## Quality bar

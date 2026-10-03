@@ -1,7 +1,7 @@
 {
   "name": "sdlc-build",
   "displayName": "SDLC 5 · Build",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Phase 5 of the Agentic SDLC: implements one planned task at a time with tests first, small diffs, traceable commits and a PR, keeping a build log.",
   "author": { "name": "Tito", "email": "pino.islas@gmail.com" },
   "license": "MIT",

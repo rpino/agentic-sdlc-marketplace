@@ -25,8 +25,17 @@
 - [ ] Support briefed (release notes sent)
 - [ ] Dashboards and alerts live
 
+## Version & supply chain
+- Version: <x.y.z> (SemVer bump from Conventional Commits: major / minor / patch)
+- CHANGELOG entry: <link>
+- SBOM: <path or CI artifact> (CycloneDX / SPDX)
+- Provenance / attestation: <SLSA level, attestation link>
+- Signed artifacts: <cosign / registry signature>
+- Open dependency vulnerabilities accepted: <none / list + approver>
+
 ## Monitoring
-- Health:
+- Health (SLIs from requirements):
+- SLO error budget remaining at go/no-go:
 - Success metric:
 
 ## Rollback

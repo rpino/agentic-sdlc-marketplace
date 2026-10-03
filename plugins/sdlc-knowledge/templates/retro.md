@@ -8,7 +8,12 @@
 ## Metrics
 | Metric | Value | Notes |
 |---|---|---|
+| Deployment frequency (DORA) | | |
+| Lead time for changes (DORA) | | |
+| Change failure rate (DORA) | | |
+| Time to restore (DORA) | | |
 | Total cycle time | | |
+| Time waiting for approvals | | |
 | Reopen events | | |
 | Gaps caught before production | | |
 | Escaped defects | | |
