@@ -1,9 +1,9 @@
 ---
 max_turns: 10
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Agent]
 ---
 
-Review this diff for task T-2 (AC-1.1: WHEN a member requests a freeze THE SYSTEM SHALL freeze only that member's own membership). Give me the findings table.
+Use the sdlc-review:code-reviewer agent to review this diff for task T-2 (AC-1.1: WHEN a member requests a freeze THE SYSTEM SHALL freeze only that member's own membership). Pass it the full diff below, since there is no git repository to read it from. Give me the agent's findings table.
 
 ```diff
 +@app.post("/memberships/<int:membership_id>/freeze")

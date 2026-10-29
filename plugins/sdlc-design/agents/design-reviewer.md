@@ -1,6 +1,7 @@
 ---
 name: design-reviewer
 description: Challenges a technical design and its ADRs — integration assumptions, data model risks, failure modes, security, scalability, over-engineering and requirement coverage. Use after design.md is drafted and before it goes to the Tech Lead.
+model: sonnet
 tools: Read, Grep, Glob
 ---
 

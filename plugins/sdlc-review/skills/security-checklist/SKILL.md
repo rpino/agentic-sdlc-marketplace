@@ -9,6 +9,8 @@ Apply to the diff(s) under review and the feature's design. For each item answer
 
 **Maker ≠ checker:** if the `sdlc-review:security-reviewer` agent is available, run it as a **subagent**. It runs the scanners and the full checklist with a fresh context. Use this skill's list to check its output is complete.
 
+**Reuse the brief.** If a `sdlc-review:context-gatherer` brief for this diff already exists (the `pr-reviewer` skill makes one), pass it to the security reviewer. Otherwise, if the agent is available, run it first as a subagent with the diff target and doc paths. The security reviewer still verifies against the diff and the code itself.
+
 ## Scanners (run what's installed; never install without asking)
 - SAST: `semgrep scan --config auto`, or CodeQL results from CI
 - Secrets: `gitleaks detect`

@@ -295,7 +295,7 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
     ├── sdlc-planning/          <span class="cmt"># skills/task-breakdown</span>
     ├── sdlc-build/             <span class="cmt"># skills/task-executor</span>
     ├── sdlc-qa/                <span class="cmt"># skills/qa-from-acceptance-criteria; agents/test-auditor</span>
-    ├── sdlc-review/            <span class="cmt"># skills/pr-reviewer, security-checklist; agents/code-reviewer, security-reviewer</span>
+    ├── sdlc-review/            <span class="cmt"># skills/pr-reviewer, security-checklist; agents/code-reviewer, security-reviewer, context-gatherer</span>
     ├── sdlc-release/           <span class="cmt"># skills/release-notes, pipeline-fixer</span>
     ├── sdlc-ops/               <span class="cmt"># skills/incident-summarizer</span>
     ├── sdlc-knowledge/         <span class="cmt"># skills/retro-capture, knowledge-updater</span>
@@ -541,6 +541,7 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
           <div>
             <h4>pr-reviewer → security-checklist · code-reviewer, security-reviewer</h4>
             <ul>
+              <li>Before the reviewers run, a cheap Haiku helper, <strong>context-gatherer</strong>, collects a factual brief (diff summary, ACs and design excerpts word for word, touched files, test commands, installed scanners). Both reviewers share it, and neither relies on it for judgment.</li>
               <li><strong>pr-reviewer</strong> dispatches the read-only <strong>code-reviewer</strong> agent on each PR: correctness against the ACs, tests, design conformance, scope, readability, performance, operability and batch size. Findings are ranked by severity and carry a Status (<code>Open</code>, <code>Fixed</code>, <code>Accepted</code>).</li>
               <li><strong>security-checklist</strong> dispatches the <strong>security-reviewer</strong> agent. It runs whichever scanners are installed (Semgrep or CodeQL, gitleaks, osv-scanner, npm audit, pip-audit, checkov) and checks 13 items based on OWASP and ASVS: access control and IDOR, auth, input validation, injection, secrets, PII, supply chain, error handling, audit logging, abuse cases, configuration, <strong>LLM and agent risks</strong> (OWASP Top 10 for LLM Apps), and threat-model coverage. Each item gets Pass, Fail or N/A with <code>file:line</code> evidence.</li>
               <li>Any Critical or High finding must be fixed, or risk-accepted by a named person. The exit check refuses to submit Review while one is <code>Open</code>.</li>

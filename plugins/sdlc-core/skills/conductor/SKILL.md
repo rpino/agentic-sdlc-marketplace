@@ -43,7 +43,7 @@ Commands act on the **active feature** unless you pass `--feature <slug>`. `SDLC
 3. **Mark it as in progress:** `SDLC set-status <phase> draft --skill <first skill>`.
 
 4. **Run the phase skills in the listed order** (e.g. `sdlc-requirements:spec-writer`, then `sdlc-requirements:acceptance-criteria`), passing the `inputs`.
-   - **Maker ≠ checker.** If the phase lists reviewer **agents** (e.g. `sdlc-review:code-reviewer`, `sdlc-qa:test-auditor`), run each as a **subagent** so it reviews with a fresh context and read-only tools. Fold its findings into the artifact or into open issues. Never review your own output in the same context and call it independent.
+   - **Maker ≠ checker.** If the phase lists reviewer **agents** (e.g. `sdlc-review:code-reviewer`, `sdlc-qa:test-auditor`), run each as a **subagent** so it reviews with a fresh context and read-only tools. Each agent file sets its own `model:`, so don't override it when dispatching. Fold its findings into the artifact or into open issues. Never review your own output in the same context and call it independent.
    - If a phase plugin is **not installed**, do the phase yourself following the "Phase contract" below, and mention that installing the plugin will make this phase consistent.
    - **Build phase:** see "Parallel build" below.
 
@@ -55,7 +55,7 @@ Commands act on the **active feature** unless you pass `--feature <slug>`. `SDLC
 7. **Stop and hand over.** Summarise in 3–6 lines: what was produced, where it is, open issues, who approves, and the exact command `/sdlc-core:approve <phase>`.
 
 ## Parallel build (optional)
-When Build has several `todo` tasks whose dependencies are all `done` and that touch different files, you may run them in parallel. Dispatch each one to a subagent with `isolation: "worktree"`, running `sdlc-build:task-executor` for that single task on its own `feature/<task-id>-<slug>` branch. Use at most 3 at a time. When they return, review each diff summary, then hand the merges to the human in dependency order. Never merge to the main branch yourself.
+When Build has several `todo` tasks whose dependencies are all `done` and that touch different files, you may run them in parallel. Dispatch each one to a subagent with `isolation: "worktree"` and `model: "sonnet"` (the standard for build workers; see CONTRIBUTING), running `sdlc-build:task-executor` for that single task on its own `feature/<task-id>-<slug>` branch. Use at most 3 at a time. When they return, review each diff summary, then hand the merges to the human in dependency order. Never merge to the main branch yourself.
 
 ## Hard rules
 

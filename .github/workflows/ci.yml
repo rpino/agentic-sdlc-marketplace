@@ -72,10 +72,13 @@ jobs:
           node-version: "22"
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
-      - name: Run evals for every plugin that has them
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Run evals for every plugin that has them (through the helper, so sdlc-core is not a missing dependency)
         run: |
           for p in plugins/*/; do
             if [ -d "$p/evals" ]; then
-              claude plugin eval "$p" --trust-plugin --no-publish --runs 3 --threshold 0.8 --max-cost-usd 5
+              python tools/eval_plugin.py "$(basename "$p")" --trust-plugin --no-publish --runs 3 --threshold 0.8 --max-cost-usd 5
             fi
           done
