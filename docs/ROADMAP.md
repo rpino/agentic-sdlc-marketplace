@@ -9,7 +9,7 @@ Planned improvements to the Agentic SDLC marketplace. Each phase can be built on
 | 3 | Brownfield foundation | — | in progress (3a, 3b and 3c built; untested on a real codebase) |
 | 4 | Change safety | 3 | planned |
 | 5 | Feedback intake | 3 (better after 4) | planned |
-| 6 | Web UI | — (shows more after 3 to 5) | planned |
+| 6 | Web UI | — (shows more after 3 to 5) | in progress (6a built; 6b and 6c not started) |
 
 Suggested order: 1, 2, 3, then 6a in parallel with 3, then 4 and 5, then 6b and 6c.
 
