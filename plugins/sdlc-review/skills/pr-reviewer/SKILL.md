@@ -9,7 +9,9 @@ argument-hint: "[PR number, branch or 'all']"
 Target: `$ARGUMENTS` (PR number/URL, branch, or all PRs listed in `docs/05-build/build-log.md`).
 
 ## For each PR / diff
-**Maker ≠ checker:** if the `sdlc-review:code-reviewer` agent is available, run it as a **subagent** on each diff (give it the diff target, task IDs and doc paths) and use its findings. Then do the steps below only to fill in gaps. If you wrote this code in this session, say so, and rely on the agent.
+**Gather once, review independently.** If the `sdlc-review:context-gatherer` agent is available, run it first as a **subagent** on each diff (give it the diff target, task IDs and doc paths). It returns a brief of facts (diff summary, ACs, design excerpts, touched files, test commands, scanners). Pass that brief to the reviewer, and to `sdlc-review:security-checklist` so the security review reuses it instead of gathering again. The brief only saves exploration; it never replaces a reviewer's own judgment. If the agent isn't available, the reviewers gather the context themselves.
+
+**Maker ≠ checker:** if the `sdlc-review:code-reviewer` agent is available, run it as a **subagent** on each diff (give it the diff target, task IDs, doc paths and the brief) and use its findings. Then do the steps below only to fill in gaps. If you wrote this code in this session, say so, and rely on the agent.
 
 1. Load the diff (`git diff main...<branch>`, or a GitHub connector/CLI), the linked task and ACs, and the design sections it implements.
 2. Review for:

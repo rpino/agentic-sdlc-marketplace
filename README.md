@@ -130,7 +130,7 @@ docs/                          (first feature; later ones use docs/features/<slu
 | 4 | sdlc-planning | task-breakdown | — | Team |
 | 5 | sdlc-build | task-executor | — | Tech Lead |
 | 6 | sdlc-qa | qa-from-acceptance-criteria | test-auditor | QA Lead |
-| 7 | sdlc-review | pr-reviewer, security-checklist | code-reviewer, security-reviewer | Tech Lead |
+| 7 | sdlc-review | pr-reviewer, security-checklist | code-reviewer, security-reviewer (helper: context-gatherer) | Tech Lead |
 | 8 | sdlc-release | release-notes, pipeline-fixer | — | Product Owner |
 | 9 | sdlc-ops | incident-summarizer | — | Product Owner |
 | 10 | sdlc-knowledge | retro-capture, knowledge-updater | — | Team |

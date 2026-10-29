@@ -23,11 +23,16 @@ claude plugin validate --strict .           # the marketplace manifest
 claude plugin validate --strict plugins/<plugin>   # each plugin you changed
 ```
 
-If you changed what a skill or agent does, also run its evals. They call the model, so they cost a little:
+If you changed what a skill or agent does, also run its evals. They call the model, so they cost a little. Use the helper script, not `claude plugin eval` directly:
 
 ```
-claude plugin eval plugins/<plugin> --runs 3
+python tools/eval_plugin.py <plugin> --trust-plugin --runs 3
+python tools/eval_plugin.py <plugin> --inherit-models --trust-plugin --runs 3   # baseline: agents inherit the session model
 ```
+
+Why the helper: every phase plugin depends on `sdlc-core`, and the eval sandbox can't satisfy that dependency, so a direct `claude plugin eval plugins/<plugin>` silently loads nothing. The "with plugin" arm is then just the bare model, and its scores say nothing about the plugin. The helper evaluates a temporary copy without the `dependencies` line, and it prints which models did the work, so you can see that each agent ran on the model its file names. `--trust-plugin` says you trust the plugin's code and eval suite, so it is passed through and not added for you.
+
+Write eval prompts so that they name the agent to run and include everything it needs inline (the sandbox has no repo), and give the case `Agent` in `allowed_tools`.
 
 ## Where things live
 
@@ -56,6 +61,21 @@ claude plugin eval plugins/<plugin> --runs 3
 - Reviewer agents are **read-only**. They get `Read, Grep, Glob`, plus `Bash` only for read-only git, tests and scanners, and the prompt must say so.
 - When the state script parses a template's output, keep the format it relies on: ID formats (`US-1`, `AC-1.2`, `T-3`, `TC-01`, `DEF-1`), `PASS`/`FAIL` in Result columns, and `Open` in Status columns.
 - Add or update an eval case under `plugins/<plugin>/evals/<case>/` when you change a skill's core behaviour.
+
+## Model standard for agents
+
+Every agent file sets `model:` in its frontmatter. The standard (also in `docs/process.md`):
+
+| Role | Model |
+|---|---|
+| `security-reviewer`, `test-auditor` | `opus` |
+| `code-reviewer`, `design-reviewer`, `requirements-reviewer` | `sonnet` |
+| Parallel build workers (set in the conductor's dispatch) | `sonnet` |
+| `context-gatherer` and any helper that only collects facts | `haiku` |
+
+- Use `haiku` only for agents that gather or reformat and never judge the work. Anything that decides what is correct, secure or complete stays on `sonnet` or `opus`.
+- Move an agent to a cheaper model only after its evals pass on the cheaper model (`claude plugin eval plugins/<plugin> --runs 3`), and say so in the PR. Move it back up if an eval regresses.
+- Never cap a reviewer's output in a way that can drop a Blocker, Major, Critical or High finding.
 
 ## Commits, versions and the changelog
 

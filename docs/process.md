@@ -29,6 +29,19 @@ not_started ──► draft ──► in_review ──► approved
 - Open issues block approval unless the approver explicitly accepts them.
 - Reopening a phase sets every later approved or in-review phase to `needs_revalidation`.
 
+## Models
+
+Each agent declares its own `model:` in its frontmatter, so the standard applies to every project with no per-project setting. The main session keeps whatever model you chose. Only subagents use these tiers.
+
+| Role | Model | Reason |
+|---|---|---|
+| `security-reviewer`, `test-auditor` | Opus | A missed vulnerability or a false-green test suite is the costliest failure. On Sonnet, `test-auditor` missed a planted false green outright in 2 of 9 eval runs, and on Opus in 0 of 6 |
+| `code-reviewer`, `design-reviewer`, `requirements-reviewer` | Sonnet | Judgment-heavy review at a lower cost; their evals match the Opus baseline |
+| `task-executor` workers (parallel build) | Sonnet | Tests are the safety net |
+| `context-gatherer` | Haiku | Collects facts only and never judges |
+
+A role moves to a cheaper model only when its evals still pass.
+
 ## Phases
 
 | # | Phase | Skills (in order) | Reviewer agents | Output | Gate | Approver |

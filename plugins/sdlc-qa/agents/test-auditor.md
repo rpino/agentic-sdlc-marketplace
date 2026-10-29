@@ -1,6 +1,7 @@
 ---
 name: test-auditor
 description: Independent, read-only audit of a feature's tests — finds false greens (tests that can't fail), missing negative/boundary cases, ACs without real verification, flaky tests and weak assertions; samples mutation testing when a tool is available. Use in the QA phase after tests are written and before the test report goes to the QA Lead.
+model: opus
 tools: Read, Grep, Glob, Bash
 ---
 

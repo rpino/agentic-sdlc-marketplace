@@ -4,6 +4,26 @@ All notable changes to this marketplace are documented here. The format follows 
 
 Plugin versions live in each `plugins/<plugin>/.claude-plugin/plugin.json`. The marketplace version is the `sdlc-core` version.
 
+## [Unreleased]
+
+### Added
+- **Model standard for agents.** Each agent now sets its own `model:`: `security-reviewer` and `test-auditor` on Opus; `code-reviewer`, `design-reviewer` and `requirements-reviewer` on Sonnet. The conductor dispatches parallel build workers on Sonnet. Your main session keeps the model you chose. See `docs/process.md` and `CONTRIBUTING.md`.
+- **`context-gatherer` agent** (sdlc-review, Haiku). It collects a factual brief of the diff (diff summary, ACs and design excerpts word for word, touched files, test commands, installed scanners). `pr-reviewer` and `security-checklist` run it once and share the brief with both reviewers.
+- `docs/ROADMAP.md`: the planned phases of work.
+
+- **`tools/eval_plugin.py`**: runs `claude plugin eval` against a temporary copy of a plugin with its `sdlc-core` dependency removed, optionally with the agents' `model:` lines removed (`--inherit-models`) for a baseline, and prints the output tokens per model for each case.
+- **Reviewer evals** that run the agent for real: `sdlc-review` (`finds-multiple-flaws`, `security-finds-injection`), `sdlc-requirements` (`reviewer-finds-gaps`), `sdlc-design` (`reviewer-finds-flaws`) and `sdlc-qa` (`auditor-finds-false-greens`).
+
+### Fixed
+- **Plugin evals never loaded the plugin.** `claude plugin eval` reported `dependency-unsatisfied: sdlc-core` and skipped the plugin, so the "with plugin" arm was the bare model. The existing `finds-idor` case also never dispatched the `code-reviewer` agent (no `Agent` tool, and the prompt did not name it), so its `format` check failed in every run. The case now names the agent and allows the `Agent` tool. Other plugins' existing evals (for example `sdlc-requirements`' `ears-acceptance-criteria`) share the dependency problem, so run them through `tools/eval_plugin.py`.
+
+### Changed
+- `code-reviewer` and `security-reviewer` accept the brief, start from the changed files and their direct callers, and keep their output to the findings table. If there are more than 25 findings the lowest-severity ones are counted rather than listed. Blocker, Major, Critical and High findings are never dropped.
+- Plugin versions: `sdlc-core`, `sdlc-design`, `sdlc-qa`, `sdlc-requirements` and `sdlc-review` are 0.3.0.
+
+### Upgrade notes
+- Reviewer subagents now run on Sonnet (security on Opus) regardless of your session model. To change a role, edit `model:` in its agent file.
+
 ## [0.2.0] — 2026-10-02
 
 ### Added

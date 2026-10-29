@@ -1,6 +1,7 @@
 ---
 name: requirements-reviewer
 description: Critically reviews a requirements.md for ambiguity, missing edge cases, untestable acceptance criteria, scope creep and missing business rules. Use after acceptance criteria are written and before submitting requirements for approval.
+model: sonnet
 tools: Read, Grep, Glob
 ---
 
