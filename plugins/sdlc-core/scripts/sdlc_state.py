@@ -185,6 +185,17 @@ LANES = {
     "chore": {
         "phases": ["planning", "build", "review"],
         "description": "Maintenance (dependency bumps, refactors): plan, build, review.",
+        # Reviewer agents that run only when the stated condition holds (phase -> agent -> condition).
+        # The costly independent security review is kept for chores that can affect security.
+        "conditional_agents": {
+            "review": {
+                "sdlc-review:security-reviewer": (
+                    "only if the diff touches authentication or authorization, input handling or "
+                    "parsing, secrets or credentials, dependency manifests or lockfiles, or "
+                    "infrastructure and CI files; otherwise skip it and write 'Security review "
+                    "skipped: low-risk chore' with the reason in the review report"),
+            },
+        },
     },
 }
 
@@ -914,6 +925,7 @@ def cmd_next(args):
         ph = feat["phases"][pid]
         prev = prev_in_lane(feat, pid)
         approver = state["approvers"].get(p["approver_role"])
+        conditional = LANES.get(feat["type"], {}).get("conditional_agents", {}).get(pid, {})
         if ph["status"] == "in_review":
             action = f"WAIT for human approval. Ask {approver} to review and run /sdlc-core:approve {pid}."
         elif ph["status"] == "reopened":
@@ -934,7 +946,8 @@ def cmd_next(args):
             "status": ph["status"],
             "previous_phase": prev,
             "skills": p["skills"],
-            "agents": p.get("agents", []),
+            "agents": [a for a in p.get("agents", []) if a not in conditional],
+            "conditional_agents": [{"agent": a, "run_if": c} for a, c in conditional.items()],
             "inputs": inputs,
             "artifacts": phase_artifacts(feat, pid),
             "gate": p["gate"],

@@ -21,7 +21,7 @@ Target: `$ARGUMENTS` (PR number/URL, branch, or all PRs listed in `docs/05-build
    - **Conventions & readability** — naming, structure, duplication, dead code, comments where needed.
    - **Performance** — N+1 queries, unbounded loops/lists, missing indexes.
    - **Operability** — logging, metrics, error messages, feature flag.
-3. Run `sdlc-review:security-checklist` on the same diff.
+3. Run `sdlc-review:security-checklist` on the same diff. (In the `chore` lane it applies the lane's rule for when the security reviewer runs.)
 4. Write findings to `docs/07-review/review-report.md` (template `${CLAUDE_PLUGIN_ROOT}/templates/review-report.md`): `File:line | Severity (Blocker/Major/Minor/Nit) | Finding | Suggested fix | Status`, where Status is `Open`, `Fixed` or `Accepted (<name>)`. The state script blocks Review from going to review while a Blocker, Major, Critical or High finding is `Open`. Post as PR comments if a connector is available and the user agrees.
 
 ## Rules

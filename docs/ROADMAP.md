@@ -4,8 +4,8 @@ Planned improvements to the Agentic SDLC marketplace. Each phase can be built on
 
 | Phase | Theme | Depends on | Status |
 |---|---|---|---|
-| 1 | Model standard and quick token wins | — | in progress |
-| 2 | Slim the process | — (best after 1) | planned |
+| 1 | Model standard and quick token wins | — | done (PR #3) |
+| 2 | Slim the process | — (best after 1) | in progress |
 | 3 | Brownfield foundation | — | planned |
 | 4 | Change safety | 3 | planned |
 | 5 | Feedback intake | 3 (better after 4) | planned |
