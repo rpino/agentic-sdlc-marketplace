@@ -38,8 +38,8 @@ Write eval prompts so that they name the agent to run and include everything it 
 
 | You want to… | Change | Also update |
 |---|---|---|
-| Add, remove or reorder a phase | `PHASES` in `plugins/sdlc-core/scripts/sdlc_state.py` | `docs/process.md` phase table, conductor "Phase contract", README |
-| Add a work type (lane) | `LANES` in `sdlc_state.py` | lanes tables in `docs/process.md`, README, conductor |
+| Add, remove or reorder a phase | `PHASES` in `plugins/sdlc-core/scripts/sdlc_state.py` | `docs/process.md` phase table, conductor `references/phase-contract.md`, README |
+| Add a work type (lane) | `LANES` in `sdlc_state.py` | lanes tables in `docs/process.md` and README. A lane can also list `conditional_agents` (reviewers that run only when a condition holds) |
 | Change what blocks a phase from going to review | `PHASE_TRACE_CHECKS` / `PHASE_HEADING_CHECKS` in `sdlc_state.py` | the matching skill and template, `docs/process.md` |
 | Add or change a gate | `plugins/sdlc-core/scripts/sdlc_gate.py` | tests in `tests/test_sdlc_gate.py`, the hooks table in README and `docs/process.md` |
 | Add a skill to a phase | `plugins/<plugin>/skills/<name>/SKILL.md` and that phase's `skills` list in `PHASES` | README plugin table |

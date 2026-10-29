@@ -67,7 +67,7 @@ A project holds one or more **features**. Each feature follows the lane for its 
 | bugfix | requirements → build → qa → review → release | A defect: expected behaviour as ACs, then fix |
 | hotfix | build → review → release → operate → knowledge | Production emergency: fix first, RCA and retro are mandatory |
 | spike | discovery → design | Time-boxed investigation ending in an ADR; no production code |
-| chore | planning → build → review | Dependency bumps, refactors, maintenance |
+| chore | planning → build → review | Dependency bumps, refactors, maintenance. The independent security review runs only when the diff touches auth, input handling, secrets, dependencies or infrastructure (`conditional_agents` in `next --json`) |
 
 Code paths unlock once every phase before Build in the lane is approved. A hotfix unlocks them immediately. A spike never does.
 

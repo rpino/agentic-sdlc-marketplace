@@ -229,6 +229,28 @@ class LanesAndFeatures(ProjectCase):
         self.assertEqual(nxt["phase"], "build")
         self.run_state("set-status", "design", "draft", ok=False)
 
+    def _next_at_review(self, lane_type):
+        """Init a project of this type with every phase before review marked approved."""
+        self.init_project("--type", lane_type)
+        st = self.state()
+        feat = list(st["features"].values())[0]
+        for pid in feat["lane"][:feat["lane"].index("review")]:
+            feat["phases"][pid]["status"] = "approved"
+        self.write(".sdlc/state.json", json.dumps(st))
+        return json.loads(self.run_state("next", "--json").stdout)
+
+    def test_chore_review_makes_the_security_reviewer_conditional(self):
+        nxt = self._next_at_review("chore")
+        self.assertEqual(nxt["phase"], "review")
+        self.assertEqual(nxt["agents"], ["sdlc-review:code-reviewer"])
+        self.assertEqual([c["agent"] for c in nxt["conditional_agents"]], ["sdlc-review:security-reviewer"])
+        self.assertIn("lockfiles", nxt["conditional_agents"][0]["run_if"])
+
+    def test_feature_review_always_runs_both_reviewers(self):
+        nxt = self._next_at_review("feature")
+        self.assertEqual(nxt["agents"], ["sdlc-review:code-reviewer", "sdlc-review:security-reviewer"])
+        self.assertEqual(nxt["conditional_agents"], [])
+
     def test_second_feature_has_its_own_docs_and_state(self):
         self.init_project()
         walk_to(self, "discovery")

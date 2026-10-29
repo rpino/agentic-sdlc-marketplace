@@ -14,6 +14,11 @@ Plugin versions live in each `plugins/<plugin>/.claude-plugin/plugin.json`. The 
 - **`tools/eval_plugin.py`**: runs `claude plugin eval` against a temporary copy of a plugin with its `sdlc-core` dependency removed, optionally with the agents' `model:` lines removed (`--inherit-models`) for a baseline, and prints the output tokens per model for each case.
 - **Reviewer evals** that run the agent for real: `sdlc-review` (`finds-multiple-flaws`, `security-finds-injection`), `sdlc-requirements` (`reviewer-finds-gaps`), `sdlc-design` (`reviewer-finds-flaws`) and `sdlc-qa` (`auditor-finds-false-greens`).
 
+- **Lighter `chore` review.** `next --json` now has a `conditional_agents` list. In the `chore` lane the Opus `security-reviewer` runs only when the diff touches authentication or authorization, input handling, secrets, dependency manifests or lockfiles, or infrastructure and CI files. `security-checklist` and `pr-reviewer` apply it, and a skip is recorded in the review report. All other lanes run both reviewers as before.
+
+### Changed (process size)
+- **Conductor slimmed.** The `conductor` skill is about 25% smaller (1,262 to 947 words). The fallback phase table (`references/phase-contract.md`) and the parallel-build rules (`references/parallel-build.md`) now load only when needed, and the lane table is replaced by `SDLC lanes`. The loop and hard rules are unchanged.
+
 ### Fixed
 - **Plugin evals never loaded the plugin.** `claude plugin eval` reported `dependency-unsatisfied: sdlc-core` and skipped the plugin, so the "with plugin" arm was the bare model. The existing `finds-idor` case also never dispatched the `code-reviewer` agent (no `Agent` tool, and the prompt did not name it), so its `format` check failed in every run. The case now names the agent and allows the `Agent` tool. Other plugins' existing evals (for example `sdlc-requirements`' `ears-acceptance-criteria`) share the dependency problem, so run them through `tools/eval_plugin.py`.
 
