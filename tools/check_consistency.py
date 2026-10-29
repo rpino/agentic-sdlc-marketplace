@@ -44,6 +44,12 @@ def main():
             if not os.path.isfile(component_path(ref, "agent")):
                 problems.append(f"PHASES[{p['id']}] names missing agent {ref}")
 
+    for name, lane_def in sdlc_state.LANES.items():
+        for pid, refs in lane_def.get("skills_override", {}).items():
+            for ref in refs:
+                if not os.path.isfile(component_path(ref, "skill")):
+                    problems.append(f"LANES[{name}] overrides {pid} with missing skill {ref}")
+
     market = json.loads(read(".claude-plugin/marketplace.json"))
     listed = {pl["name"] for pl in market["plugins"]}
     on_disk = {d for d in os.listdir(os.path.join(REPO, "plugins"))

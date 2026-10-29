@@ -7,6 +7,12 @@ Plugin versions live in each `plugins/<plugin>/.claude-plugin/plugin.json`. The 
 ## [Unreleased]
 
 ### Added
+- **Brownfield foundation (roadmap Phase 3).**
+  - **`enhancement` lane:** all phases except Discovery, for changes to existing behaviour.
+  - **Living spec** at `docs/system/spec.md`: one description of how the system behaves today, as stable `CAP-n` entries that cite their source feature and code evidence. `SDLC spec init` creates it from a template. `next --json` now has a `living_spec` field (`mode`, `path`, `exists`), and the conductor passes the touched capabilities to the phase skills as context.
+  - **`sdlc-release:spec-updater`** merges each change into the spec at release, and the Release phase now requires `08-release/spec-update.md` (with a "Living spec" heading), which contains every added or changed entry for the approver to read. How much each lane updates: full for features and enhancements, only if behaviour changed for bug fixes, a short note plus a follow-up issue for hotfixes.
+  - **`adopt` lane and `/sdlc-core:adopt`:** onboards an existing codebase. `sdlc-design:baseline-drafter` reverse-engineers `docs/system/architecture.md`, the first living spec and an adoption report (with confidence per area and unconfirmed items), and the Tech Lead approves the baseline at the Design gate.
+  - `spec-writer` and `design-drafter` read the living spec when it exists. `tools/check_consistency.py` checks lane `skills_override` skills.
 - **Model standard for agents.** Each agent now sets its own `model:`: `security-reviewer` and `test-auditor` on Opus; `code-reviewer`, `design-reviewer` and `requirements-reviewer` on Sonnet. The conductor dispatches parallel build workers on Sonnet. Your main session keeps the model you chose. See `docs/process.md` and `CONTRIBUTING.md`.
 - **`context-gatherer` agent** (sdlc-review, Haiku). It collects a factual brief of the diff (diff summary, ACs and design excerpts word for word, touched files, test commands, installed scanners). `pr-reviewer` and `security-checklist` run it once and share the brief with both reviewers.
 - `docs/ROADMAP.md`: the planned phases of work.

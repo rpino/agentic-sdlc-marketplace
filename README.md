@@ -12,16 +12,19 @@ Not everything needs all 10 phases. Each piece of work has a **type** that picks
 | Type | Phases |
 |---|---|
 | `feature` | all 10 |
+| `enhancement` | all except discovery (a change to existing behaviour, starting from the living spec) |
 | `bugfix` | requirements → build → qa → review → release |
 | `hotfix` | build → review → release → operate → knowledge |
 | `spike` | discovery → design |
 | `chore` | planning → build → review |
+| `adopt` | design (onboards an existing codebase into a baseline) |
 
 You don't call skills one by one. You use a few commands, and the conductor runs the right skills for each phase:
 
 | Command | What it does |
 |---|---|
 | `/sdlc-core:init "Name" [--type …]` | Creates the project (or a new feature in an existing one) and starts its first phase |
+| `/sdlc-core:adopt "Name"` | Onboards an existing codebase: drafts a baseline of its architecture and current behaviour (`docs/system/`) for a human to approve |
 | `/sdlc-core:next` | Runs the next step of the current phase, or tells you an approval is pending |
 | `/sdlc-core:approve` | **Human gate.** Records who approved the phase and moves the work forward. Only works when a human types it |
 | `/sdlc-core:status` | Shows where the work stands, who approved what, stale approvals and open decisions |
@@ -109,7 +112,7 @@ docs/                          (first feature; later ones use docs/features/<slu
 ├── 05-build/build-log.md
 ├── 06-qa/test-cases.md, test-report.md
 ├── 07-review/review-report.md               (incl. scanner results)
-├── 08-release/release-plan.md, release-notes.md   (SemVer, CHANGELOG, SBOM)
+├── 08-release/release-plan.md, release-notes.md, spec-update.md   (SemVer, CHANGELOG, SBOM, living spec)
 ├── 09-operate/monitoring.md, RCA-*.md
 └── 10-knowledge/retro.md      (DORA metrics; standing rules appended to CLAUDE.md)
 ```
@@ -123,15 +126,15 @@ docs/                          (first feature; later ones use docs/features/<slu
 
 | # | Plugin | Skills | Agents (independent reviewers) | Gate (approver) |
 |---|---|---|---|---|
-| — | **sdlc-core** | conductor, init, next, approve, status, reopen, settings | — | — |
+| — | **sdlc-core** | conductor, init, adopt, next, approve, status, reopen, settings | — | — |
 | 1 | sdlc-discovery | idea-interviewer | — | Product Owner |
 | 2 | sdlc-requirements | spec-writer, acceptance-criteria | requirements-reviewer | Product Owner |
-| 3 | sdlc-design | design-drafter | design-reviewer | Tech Lead |
+| 3 | sdlc-design | design-drafter, baseline-drafter | design-reviewer | Tech Lead |
 | 4 | sdlc-planning | task-breakdown | — | Team |
 | 5 | sdlc-build | task-executor | — | Tech Lead |
 | 6 | sdlc-qa | qa-from-acceptance-criteria | test-auditor | QA Lead |
 | 7 | sdlc-review | pr-reviewer, security-checklist | code-reviewer, security-reviewer (helper: context-gatherer) | Tech Lead |
-| 8 | sdlc-release | release-notes, pipeline-fixer | — | Product Owner |
+| 8 | sdlc-release | release-notes, spec-updater, pipeline-fixer | — | Product Owner |
 | 9 | sdlc-ops | incident-summarizer | — | Product Owner |
 | 10 | sdlc-knowledge | retro-capture, knowledge-updater | — | Team |
 | + | sdlc-connectors | — (MCP: GitHub, Linear, Atlassian) | — | — |

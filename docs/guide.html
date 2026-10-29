@@ -212,7 +212,7 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
 
       <div class="prose">
         <h2>What it does</h2>
-        <p>Claude Code is good at writing code, but on its own it will happily skip straight from a vague idea to an implementation. This marketplace puts a delivery process around it. A feature passes through Discovery, Requirements, Design, Planning, Build, QA, Review, Release, Operate and Knowledge, in that order. Smaller work types (bugfix, hotfix, spike, chore) follow a shorter lane. Each phase produces a markdown artifact, and that artifact is the input to the next phase.</p>
+        <p>Claude Code is good at writing code, but on its own it will happily skip straight from a vague idea to an implementation. This marketplace puts a delivery process around it. A feature passes through Discovery, Requirements, Design, Planning, Build, QA, Review, Release, Operate and Knowledge, in that order. Smaller work types (enhancement, bugfix, hotfix, spike, chore) follow a shorter lane, and <code>adopt</code> onboards an existing codebase. Each phase produces a markdown artifact, and that artifact is the input to the next phase.</p>
         <p>You drive the whole thing with a handful of commands. The conductor works out which phase is current, runs that phase's skills, has independent agents review the result, records questions that need a human answer, and then stops and waits for approval. Python hooks and the state script enforce the rules the prompts ask for. An agent can't write production code before the plan is approved, approve its own work, weaken a gate, or deploy to production. Traceability gaps and stale approvals are caught by code, not by hope.</p>
       </div>
 
@@ -258,6 +258,8 @@ footer { font-size: 13px; color: var(--muted); padding-top: 18px; border-top: 1p
           <tr><td><code>hotfix</code></td><td>build → review → release → operate → knowledge</td><td>Production emergency: code unlocked at once, but review, RCA and retro still required</td></tr>
           <tr><td><code>spike</code></td><td>discovery → design</td><td>Time-boxed investigation ending in an ADR. Never unlocks code</td></tr>
           <tr><td><code>chore</code></td><td>planning → build → review</td><td>Dependency bumps, refactors, maintenance</td></tr>
+          <tr><td><code>enhancement</code></td><td>all except discovery</td><td>Change to existing behaviour, starting from the living spec (<code>docs/system/spec.md</code>)</td></tr>
+          <tr><td><code>adopt</code></td><td>design</td><td>Onboard an existing codebase into a baseline for the Tech Lead to approve</td></tr>
         </tbody>
       </table></div>
     </section>
