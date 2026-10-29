@@ -7,6 +7,7 @@ Plugin versions live in each `plugins/<plugin>/.claude-plugin/plugin.json`. The 
 ## [Unreleased]
 
 ### Added
+- **Read-only web dashboard** (`ui/`, roadmap step 6a): Next.js, TypeScript and Tailwind, listening on `127.0.0.1:4310`. It shows each registered project's pipeline per feature, what is waiting for approval, open decisions, stale approvals, the AC to task to test traceability matrix, artifacts (Markdown viewer) and recent activity. It runs the existing `sdlc_state.py status|next|trace|verify --json` instead of re-implementing the process, never changes a project, and keeps its list of project folders in `~/.agentic-sdlc-ui/projects.json`. Approvals still happen in Claude Code. See `ui/README.md`. CI gets a `ui` job (typecheck, tests, build).
 - **Brownfield foundation (roadmap Phase 3).**
   - **`enhancement` lane:** all phases except Discovery, for changes to existing behaviour.
   - **Living spec** at `docs/system/spec.md`: one description of how the system behaves today, as stable `CAP-n` entries that cite their source feature and code evidence. `SDLC spec init` creates it from a template. `next --json` now has a `living_spec` field (`mode`, `path`, `exists`), and the conductor passes the touched capabilities to the phase skills as context.

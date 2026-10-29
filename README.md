@@ -32,6 +32,8 @@ You don't call skills one by one. You use a few commands, and the conductor runs
 
 The conductor can also reopen an earlier phase (`/sdlc-core:reopen`) when a later one finds a gap.
 
+**Dashboard:** `ui/` is a read-only local web page for following projects (pipeline, approvals waiting, decisions, traceability). See [ui/README.md](ui/README.md).
+
 **Documentation:**
 - [docs/guide.html](docs/guide.html): illustrated reference
 - [docs/process.md](docs/process.md): process definition
