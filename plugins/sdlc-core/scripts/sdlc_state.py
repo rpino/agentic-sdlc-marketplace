@@ -23,6 +23,7 @@ Usage:
   sdlc_state.py issue resolve <phase> <issue-id> [--note TEXT]
   sdlc_state.py verify [--json]              # approvals whose artifacts changed since
   sdlc_state.py trace [--json]               # US -> AC -> T -> TC -> result matrix + orphans
+  sdlc_state.py spec init                    # create docs/system/spec.md (the living spec) if missing
   sdlc_state.py metrics [--json]             # DORA + flow metrics from the history
   sdlc_state.py record deploy|incident|restore [--note TEXT] [--ref ID]
   sdlc_state.py settings show | add-code-path P | remove-code-path P | require-tests on|off
@@ -135,8 +136,9 @@ PHASES = [
         "id": "release",
         "title": "Release",
         "folder": "08-release",
-        "skills": ["sdlc-release:release-notes", "sdlc-release:pipeline-fixer"],
-        "artifacts": ["08-release/release-plan.md", "08-release/release-notes.md"],
+        "skills": ["sdlc-release:release-notes", "sdlc-release:spec-updater", "sdlc-release:pipeline-fixer"],
+        "artifacts": ["08-release/release-plan.md", "08-release/release-notes.md",
+                      "08-release/spec-update.md"],
         "gate": "Product Owner + stakeholder give go/no-go for rollout",
         "approver_role": "product_owner",
     },
@@ -169,22 +171,41 @@ LANES = {
     "feature": {
         "phases": PHASE_IDS,
         "description": "New capability: the full idea-to-retro flow.",
+        "living_spec": "full",
+    },
+    "enhancement": {
+        "phases": [p for p in PHASE_IDS if p != "discovery"],
+        "description": ("Change to existing behaviour: a feature without Discovery, because the "
+                        "system and its problem already exist. Starts from the living spec."),
+        "living_spec": "full",
     },
     "bugfix": {
         "phases": ["requirements", "build", "qa", "review", "release"],
         "description": "Defect fix: expected behaviour as ACs, then fix, test, review, release.",
+        "living_spec": "if-behaviour-changes",
     },
     "hotfix": {
         "phases": ["build", "review", "release", "operate", "knowledge"],
         "description": "Production emergency: fix first, mandatory review, then RCA and retro.",
+        "living_spec": "note",
     },
     "spike": {
         "phases": ["discovery", "design"],
         "description": "Time-boxed investigation: ends with a design/ADR, no production code.",
+        "living_spec": "none",
+    },
+    "adopt": {
+        "phases": ["design"],
+        "description": ("Onboard an existing codebase: reverse-engineer its architecture and current "
+                        "behaviour into a baseline (living spec) for a human to approve."),
+        "living_spec": "baseline",
+        # Lane-specific skills for a phase (phase -> skills), replacing the phase's default skills.
+        "skills_override": {"design": ["sdlc-design:baseline-drafter"]},
     },
     "chore": {
         "phases": ["planning", "build", "review"],
         "description": "Maintenance (dependency bumps, refactors): plan, build, review.",
+        "living_spec": "none",
         # Reviewer agents that run only when the stated condition holds (phase -> agent -> condition).
         # The costly independent security review is kept for chores that can affect security.
         "conditional_agents": {
@@ -198,6 +219,10 @@ LANES = {
         },
     },
 }
+
+# The living spec: one project-level description of how the system behaves today.
+LIVING_SPEC = "docs/system/spec.md"
+SYSTEM_ARCHITECTURE = "docs/system/architecture.md"
 
 DEFAULT_CODE_PATHS = ["src/", "app/", "lib/", "services/", "packages/", "api/", "web/", "tests/", "test/"]
 # Globs matched against the file name; entries ending in "/" match a directory
@@ -711,7 +736,8 @@ PHASE_HEADING_CHECKS = {
     "discovery": [("01-discovery/problem-brief.md", r"success metric")],
     "design": [("03-design/design.md", r"threat model|security")],
     "release": [("08-release/release-plan.md", r"rollback"),
-                ("08-release/release-plan.md", r"go\s*/\s*no-go")],
+                ("08-release/release-plan.md", r"go\s*/\s*no-go"),
+                ("08-release/spec-update.md", r"living spec")],
 }
 
 
@@ -728,6 +754,10 @@ def exit_check_failures(root, feat, pid, extra_artifacts=()):
             fails.append("requirements.md has no user stories (US-n)")
         if not ids_in(req, "AC"):
             fails.append("requirements.md has no acceptance criteria (AC-n.m)")
+    if feat.get("type") == "adopt" and pid == "design":
+        for rel in (LIVING_SPEC, SYSTEM_ARCHITECTURE):
+            if not os.path.exists(os.path.join(root, rel)):
+                fails.append(f"adopt needs {rel} (run `spec init`, then fill it in)")
     for rel, pattern in PHASE_HEADING_CHECKS.get(pid, []):
         text = read_text(os.path.join(root, docs_path(feat, rel)))
         if text is not None and not re.search(r"^#+.*(" + pattern + ")", text, re.I | re.M):
@@ -926,6 +956,7 @@ def cmd_next(args):
         prev = prev_in_lane(feat, pid)
         approver = state["approvers"].get(p["approver_role"])
         conditional = LANES.get(feat["type"], {}).get("conditional_agents", {}).get(pid, {})
+        skills = LANES.get(feat["type"], {}).get("skills_override", {}).get(pid, p["skills"])
         if ph["status"] == "in_review":
             action = f"WAIT for human approval. Ask {approver} to review and run /sdlc-core:approve {pid}."
         elif ph["status"] == "reopened":
@@ -945,10 +976,13 @@ def cmd_next(args):
             "title": p["title"],
             "status": ph["status"],
             "previous_phase": prev,
-            "skills": p["skills"],
+            "skills": skills,
             "agents": [a for a in p.get("agents", []) if a not in conditional],
             "conditional_agents": [{"agent": a, "run_if": c} for a, c in conditional.items()],
             "inputs": inputs,
+            "living_spec": {"mode": LANES.get(feat["type"], {}).get("living_spec", "none"),
+                            "path": LIVING_SPEC,
+                            "exists": os.path.isfile(os.path.join(root, LIVING_SPEC))},
             "artifacts": phase_artifacts(feat, pid),
             "gate": p["gate"],
             "approver": approver,
@@ -1318,6 +1352,21 @@ def cmd_phases(args):
             print(f"{i:>2}. {p['id']:<13} skills={', '.join(p['skills'])}  gate={p['gate']}")
 
 
+def cmd_spec(args):
+    root, state = load()
+    path = os.path.join(root, LIVING_SPEC)
+    if os.path.isfile(path):
+        print(f"{LIVING_SPEC} already exists; left unchanged.")
+        return
+    tpl = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "templates", "system-spec.md")
+    with open(tpl, encoding="utf-8") as f:
+        body = f.read().replace("{{PROJECT}}", state.get("project", "this system"))
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(body)
+    print(f"Created {LIVING_SPEC} from the template.")
+
+
 def cmd_lanes(args):
     if args.json:
         print(json.dumps(LANES, indent=2))
@@ -1415,6 +1464,10 @@ def main(argv=None):
     s = sub.add_parser("phases")
     s.add_argument("--json", action="store_true")
     s.set_defaults(fn=cmd_phases)
+
+    s = sub.add_parser("spec")
+    s.add_argument("action", choices=["init"])
+    s.set_defaults(fn=cmd_spec)
 
     s = sub.add_parser("lanes")
     s.add_argument("--json", action="store_true")

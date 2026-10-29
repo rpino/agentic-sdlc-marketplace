@@ -53,7 +53,7 @@ A role moves to a cheaper model only when its evals still pass.
 | 5 | Build | task-executor (per task, optionally in parallel worktrees) | — | code, tests, build-log.md | All task diffs reviewed | Tech Lead |
 | 6 | QA | qa-from-acceptance-criteria | test-auditor | test-cases.md, test-report.md | Every AC has a passing test | QA Lead |
 | 7 | Review | pr-reviewer → security-checklist | code-reviewer, security-reviewer | review-report.md (+ scanner results) | Merge sign-off, no open High | Tech Lead |
-| 8 | Release | release-notes (+ pipeline-fixer) | — | release-plan.md (SemVer, SBOM, rollout), release-notes.md | Go / no-go | Product Owner |
+| 8 | Release | release-notes → spec-updater (+ pipeline-fixer) | — | release-plan.md (SemVer, SBOM, rollout), release-notes.md, spec-update.md (living spec) | Go / no-go | Product Owner |
 | 9 | Operate | incident-summarizer | — | monitoring.md (SLOs), RCA-*.md | Stable or incidents handled | Product Owner |
 | 10 | Knowledge | retro-capture → knowledge-updater | — | retro.md (DORA), CLAUDE.md rules | Lessons adopted | Team |
 
@@ -64,10 +64,24 @@ A project holds one or more **features**. Each feature follows the lane for its 
 | Lane | Phases | Use for |
 |---|---|---|
 | feature | all 10 | New capability |
+| enhancement | all except discovery | Change to existing behaviour: the system and its problem already exist. Starts from the living spec |
 | bugfix | requirements → build → qa → review → release | A defect: expected behaviour as ACs, then fix |
 | hotfix | build → review → release → operate → knowledge | Production emergency: fix first, RCA and retro are mandatory |
 | spike | discovery → design | Time-boxed investigation ending in an ADR; no production code |
 | chore | planning → build → review | Dependency bumps, refactors, maintenance. The independent security review runs only when the diff touches auth, input handling, secrets, dependencies or infrastructure (`conditional_agents` in `next --json`) |
+
+| adopt | design | Onboarding an existing codebase: reverse-engineer its architecture and current behaviour into a baseline for the Tech Lead to approve (`sdlc-design:baseline-drafter`) |
+
+### Living spec
+
+`docs/system/spec.md` describes how the system behaves **today**, as stable `CAP-n` entries that cite their source feature and code evidence. `adopt` drafts the first version from the code. At release, `sdlc-release:spec-updater` merges the change, and the Release gate approves `08-release/spec-update.md`, which contains every added or changed entry. How much each lane updates:
+
+| Lane | Update at release |
+|---|---|
+| feature, enhancement | Full merge |
+| bugfix | Only if the fix changed documented behaviour, or the spec was wrong |
+| hotfix | A short note under "Unconfirmed", plus an open issue to reconcile in the Knowledge phase |
+| chore, spike | None (these lanes have no Release phase) |
 
 Code paths unlock once every phase before Build in the lane is approved. A hotfix unlocks them immediately. A spike never does.
 

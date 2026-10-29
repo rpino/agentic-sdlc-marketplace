@@ -9,7 +9,7 @@ Inputs: `docs/02-requirements/requirements.md` (approved), the codebase. Outputs
 
 ## Steps
 
-1. **Understand the system first.** Explore the repo: entry points, modules touched by the stories, data stores, integrations, existing patterns and conventions (naming, error handling, testing). Note anything in `CLAUDE.md` under "Standing rules". If there is no code yet, say so and design greenfield.
+1. **Understand the system first.** Explore the repo: entry points, modules touched by the stories, data stores, integrations, existing patterns and conventions (naming, error handling, testing). Note anything in `CLAUDE.md` under "Standing rules". If there is no code yet, say so and design greenfield. If `docs/system/spec.md` exists, read it first and cite the `CAP-n` entries the design must preserve or change.
 2. **Map requirements to change.** For each AC, decide which component(s) change. Every AC must land somewhere.
 3. **Draft the design** — keep it as small as the requirements allow:
    - Context and component diagram (Mermaid)

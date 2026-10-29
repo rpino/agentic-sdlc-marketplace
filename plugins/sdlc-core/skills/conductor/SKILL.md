@@ -25,6 +25,7 @@ Commands act on the **active feature** unless you pass `--feature <slug>`. `SDLC
 1. **Read state.** Run `SDLC next --json`. It returns the feature, the phase to work on, its status, the skills and reviewer agents to use, the **inputs** (approved artifacts from earlier phases), the expected **artifacts** (paths already resolved for this feature's `docs_root`), the gate, the approver and any open issues.
    - If it errors with "No Agentic SDLC project found", tell the user to run `/sdlc-core:init "<Project Name>"` and stop.
    - Phase skills describe default paths such as `docs/02-requirements/…`. Always use the paths from `next --json`, because a second feature lives under `docs/features/<slug>/`.
+   - **Living spec.** `living_spec` says how this work type treats `docs/system/spec.md`, the project's description of current behaviour. If `mode` is not `none` and `exists` is true, read the capabilities your work touches and pass them to the phase skills as context: the change must stay consistent with them or say what it changes. If `exists` is false for an `enhancement`, `bugfix` or `hotfix`, tell the user they can run `/sdlc-core:adopt` to create a baseline first, and carry on if they prefer.
 
 2. **Branch on status:**
    - `in_review`: **stop.** Tell the user the artifact is waiting for review, name the approver and the gate, and tell them to run `/sdlc-core:approve <phase>` when satisfied, or give feedback to revise it. Do nothing else.

@@ -9,7 +9,7 @@ Input: `docs/01-discovery/problem-brief.md` (approved). Output: `docs/02-require
 
 ## Steps
 
-1. **Read the brief.** List its in-scope capabilities, users and constraints. Anything out of scope stays out.
+1. **Read the brief.** List its in-scope capabilities, users and constraints. Anything out of scope stays out. If `docs/system/spec.md` exists, read the `CAP-n` entries this work touches and name them in the stories they affect, so each change is tied to the behaviour it modifies.
 2. **Ask clarifying questions** (max 5, one at a time) only where the brief is silent on a behaviour that changes the stories. Otherwise record the gap as an open question.
 3. **Write user stories** — one per user-visible capability:
    - ID `US-n`, format: *As a <role>, I want <capability> so that <benefit>.*

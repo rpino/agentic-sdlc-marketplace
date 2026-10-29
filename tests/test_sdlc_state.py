@@ -2,7 +2,7 @@ import json
 import os
 import unittest
 
-from helpers import (BRIEF, CASES, DESIGN, PROMPT, REPORT, REQS, TASKS, ProjectCase, sdlc_state,
+from helpers import (BRIEF, BUILD, CASES, DESIGN, PROMPT, REPORT, REQS, TASKS, ProjectCase, sdlc_state,
                      walk_to)
 
 
@@ -250,6 +250,60 @@ class LanesAndFeatures(ProjectCase):
         nxt = self._next_at_review("feature")
         self.assertEqual(nxt["agents"], ["sdlc-review:code-reviewer", "sdlc-review:security-reviewer"])
         self.assertEqual(nxt["conditional_agents"], [])
+
+    def test_enhancement_lane_is_a_feature_without_discovery(self):
+        self.init_project("--type", "enhancement")
+        feat = list(self.state()["features"].values())[0]
+        self.assertEqual(feat["lane"], [p for p in sdlc_state.PHASE_IDS if p != "discovery"])
+        nxt = json.loads(self.run_state("next", "--json").stdout)
+        self.assertEqual(nxt["phase"], "requirements")
+        self.assertEqual(nxt["living_spec"]["mode"], "full")
+        self.assertFalse(nxt["living_spec"]["exists"])
+
+    def test_every_lane_declares_how_it_keeps_the_living_spec(self):
+        modes = {n: l.get("living_spec") for n, l in sdlc_state.LANES.items()}
+        self.assertEqual(modes, {"feature": "full", "enhancement": "full", "bugfix": "if-behaviour-changes",
+                                 "hotfix": "note", "spike": "none", "chore": "none", "adopt": "baseline"})
+
+    def test_adopt_lane_uses_the_baseline_drafter_and_needs_the_system_files(self):
+        self.init_project("--type", "adopt")
+        nxt = json.loads(self.run_state("next", "--json").stdout)
+        self.assertEqual((nxt["phase"], nxt["skills"]), ("design", ["sdlc-design:baseline-drafter"]))
+        self.write("docs/03-design/design.md", "# Baseline\n## Security observations\nnone\n")
+        self.run_state("set-status", "design", "draft")
+        self.run_state("set-status", "design", "in_review", ok=False)  # no spec or architecture yet
+        self.run_state("spec", "init")
+        self.write("docs/system/architecture.md", "# Architecture\n")
+        self.run_state("set-status", "design", "in_review")
+
+    def test_spec_init_creates_the_skeleton_once(self):
+        self.init_project("--type", "enhancement")
+        self.run_state("spec", "init")
+        path = os.path.join(self.dir, "docs", "system", "spec.md")
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        self.assertIn("Demo Project: living specification", text)
+        with open(path, "a", encoding="utf-8") as f:
+            f.write("\nCAP-1 was edited\n")
+        self.assertIn("left unchanged", self.run_state("spec", "init").stdout)
+        with open(path, encoding="utf-8") as f:
+            self.assertIn("CAP-1 was edited", f.read())
+
+    def test_release_needs_a_living_spec_update(self):
+        self.init_project("--type", "hotfix")
+        self.pass_phase("build", BUILD)
+        review = ("docs/07-review/review-report.md",
+                  "# Review\n| File:line | Severity | Finding | Fix | Status |\n|---|---|---|---|---|\n")
+        self.pass_phase("review", review)
+        plan = ("docs/08-release/release-plan.md", "# Plan\n## Rollback\nrevert\n## Go / no-go\nyes\n")
+        notes = ("docs/08-release/release-notes.md", "# Notes\n")
+        for rel, text in (plan, notes):
+            self.write(rel, text)
+        self.run_state("set-status", "release", "draft")
+        out = self.run_state("set-status", "release", "in_review", ok=False)
+        self.assertIn("spec-update.md", out.stdout + out.stderr)
+        self.write("docs/08-release/spec-update.md", "# Living spec update\nNote: hotfix, reconcile later.\n")
+        self.run_state("set-status", "release", "in_review")
 
     def test_second_feature_has_its_own_docs_and_state(self):
         self.init_project()
