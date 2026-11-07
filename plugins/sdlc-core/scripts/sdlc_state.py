@@ -233,13 +233,19 @@ DEFAULT_TEST_PATTERNS = [
     "tests/", "test/", "__tests__/", "spec/",
 ]
 # Commands that change production or shared infrastructure. Deploying is a human action.
+# Before 0.3.1 the push-to-main default let "main" appear anywhere after `git push`, so it also
+# matched branch names like feature/main-menu. merged_settings() swaps this exact string for the
+# current default.
+OLD_PUSH_MAIN_PATTERN = r"\bgit\s+push\b.*\b(main|master)\b"
+PUSH_MAIN_PATTERN = r"\bgit\s+push\b(?:\s+\S+)*?\s+\+?(?:\S+:)?(?:refs/heads/)?(?:main|master)(?=\s|$)"
+
 DEFAULT_BLOCKED_COMMANDS = [
     r"\bterraform\s+(apply|destroy)\b",
     r"\bkubectl\s+(apply|delete|rollout|scale)\b",
     r"\bhelm\s+(install|upgrade|uninstall|rollback)\b",
     r"\bvercel\b.*\s--prod\b",
     r"\bgit\s+push\b.*\s(--force|-f)\b",
-    r"\bgit\s+push\b.*\b(main|master)\b",
+    PUSH_MAIN_PATTERN,
 ]
 
 DEFAULT_SETTINGS = {
@@ -322,6 +328,8 @@ def merged_settings(settings):
     """Fill in settings keys that older state files don't have."""
     out = copy.deepcopy(DEFAULT_SETTINGS)
     out.update(settings or {})
+    out["blocked_commands"] = [PUSH_MAIN_PATTERN if c == OLD_PUSH_MAIN_PATTERN else c
+                               for c in out.get("blocked_commands", [])]
     if "test_markers" in out:  # v1 substring markers matched e.g. 'latest.py'; replaced by globs
         out.pop("test_markers")
     return out

@@ -94,6 +94,33 @@ class BlockedCommands(ProjectCase):
         self.assertAllowed(self.gate("Bash", command="git push -u origin feature/T-3-freeze"))
         self.assertAllowed(self.gate("Bash", command="terraform plan"))
 
+    def test_pushes_to_main_in_any_form_are_denied(self):
+        self.init_project()
+        for cmd in ("git push origin HEAD:main", "git push -u origin master",
+                    "git status && git push origin main", "git push origin feature/x; git push origin main",
+                    "git push origin main && echo done", "git push --force-with-lease origin x",
+                    'bash -c "git push origin main"', "echo hi | git push origin main"):
+            self.assertDenied(self.gate("Bash", command=cmd), "human")
+
+    def test_blocked_words_in_other_segments_or_quotes_are_allowed(self):
+        self.init_project()
+        for cmd in ("git push origin my-branch && git checkout main",
+                    "git push origin feature/main-menu",
+                    "git push origin my-branch && git commit -m 'merge into main'",
+                    'git commit -m "docs: run kubectl apply by hand"',
+                    'echo "terraform apply"',
+                    "git push origin my-branch; echo main"):
+            self.assertAllowed(self.gate("Bash", command=cmd))
+
+    def test_old_default_push_pattern_is_upgraded(self):
+        self.init_project()
+        st = self.state()
+        st["settings"]["blocked_commands"] = [r"\bgit\s+push\b.*\b(main|master)\b"]
+        with open(os.path.join(self.dir, ".sdlc", "state.json"), "w", encoding="utf-8") as f:
+            json.dump(st, f)
+        self.assertAllowed(self.gate("Bash", command="git push origin feature/main-menu"))
+        self.assertDenied(self.gate("Bash", command="git push origin main"), "human")
+
 
 class CommitRules(ProjectCase):
     def git(self, *args):
