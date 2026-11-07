@@ -6,6 +6,10 @@ Plugin versions live in each `plugins/<plugin>/.claude-plugin/plugin.json`. The 
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-11-06
+
+First published release since 0.2.0. It includes all the 0.3.0 work (plugin versions were bumped to 0.3.0 but it was never released), so the lists below cover everything since 0.2.0.
+
 ### Added
 - **Read-only web dashboard** (`ui/`, roadmap step 6a): Next.js, TypeScript and Tailwind, listening on `127.0.0.1:4310`. It shows each registered project's pipeline per feature, what is waiting for approval, open decisions, stale approvals, the AC to task to test traceability matrix, artifacts (Markdown viewer) and recent activity. It runs the existing `sdlc_state.py status|next|trace|verify --json` instead of re-implementing the process, never changes a project, and keeps its list of project folders in `~/.agentic-sdlc-ui/projects.json`. Approvals still happen in Claude Code. See `ui/README.md`. CI gets a `ui` job (typecheck, tests, build).
 - **Brownfield foundation (roadmap Phase 3).**
@@ -32,7 +36,7 @@ Plugin versions live in each `plugins/<plugin>/.claude-plugin/plugin.json`. The 
 
 ### Changed
 - `code-reviewer` and `security-reviewer` accept the brief, start from the changed files and their direct callers, and keep their output to the findings table. If there are more than 25 findings the lowest-severity ones are counted rather than listed. Blocker, Major, Critical and High findings are never dropped.
-- Plugin versions: `sdlc-core`, `sdlc-design`, `sdlc-qa`, `sdlc-requirements` and `sdlc-review` are 0.3.0.
+- Plugin versions: `sdlc-core`, `sdlc-design`, `sdlc-qa`, `sdlc-requirements` and `sdlc-review` are 0.3.0, and `sdlc-core` (the marketplace version) is 0.3.1.
 
 ### Upgrade notes
 - Reviewer subagents now run on Sonnet (security on Opus) regardless of your session model. To change a role, edit `model:` in its agent file.
@@ -104,6 +108,7 @@ Plugin versions live in each `plugins/<plugin>/.claude-plugin/plugin.json`. The 
 - First release: the `sdlc-core` conductor, state script and hooks, plus 10 phase plugins from Discovery to Knowledge, with human approval gates, artifact templates, and the `requirements-reviewer` and `design-reviewer` agents.
 - HTML reference guide (`docs/guide.html`).
 
+[0.3.1]: https://github.com/rpino/agentic-sdlc-marketplace/compare/b75e946...v0.3.1
 [0.2.0]: https://github.com/rpino/agentic-sdlc-marketplace/compare/38003c6...b75e946
 [0.1.1]: https://github.com/rpino/agentic-sdlc-marketplace/compare/8a11af2...38003c6
 [0.1.0]: https://github.com/rpino/agentic-sdlc-marketplace/commit/8a11af2
