@@ -129,6 +129,20 @@ def split_segments(command):
     return [s for s in re.split(r"\s*(?:&&|\|\||;|\||\n)\s*", command) if s.strip()]
 
 
+QUOTED = re.compile(r"\"(?:\\.|[^\"\\])*\"|'[^']*'")
+SHELL_PAYLOAD = re.compile(r"\b(?:ba|z|da)?sh\s+-[a-zA-Z]*c\s+(" + QUOTED.pattern + ")")
+
+
+def blocked_candidates(command, depth=0):
+    """Pieces of a command that the blocked_commands patterns are matched against: each shell
+    segment with quoted text removed, plus the payload of `sh -c "..."` (matched the same way)."""
+    out = [s for s in split_segments(QUOTED.sub('""', command))]
+    if depth < 3:
+        for m in SHELL_PAYLOAD.finditer(command):
+            out += blocked_candidates(m.group(1)[1:-1], depth + 1)
+    return out
+
+
 def tokens(segment):
     try:
         return shlex.split(segment, posix=True)
@@ -181,9 +195,12 @@ def check_shell(command, cwd):
     settings = state["settings"]
 
     # Rule 5: production-changing commands are a human action.
+    # Matched per segment with quotes removed, so a later `main` or a commit message that mentions
+    # `kubectl apply` is not mistaken for the command itself.
+    candidates = blocked_candidates(command)
     for pattern in settings.get("blocked_commands", []):
         try:
-            if re.search(pattern, command):
+            if any(re.search(pattern, c) for c in candidates):
                 deny(f"'{command[:80]}' matches a blocked command ({pattern}). Deploying, changing "
                      "infrastructure and force-pushing are done by a human. Present the command "
                      "for the user to run instead.")
